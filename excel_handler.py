@@ -151,3 +151,25 @@ def parse_juror_sheet(sheet) -> dict:
         jurors[juror_id] = juror_data  # add to dictionary
 
     return jurors
+
+def load_jurors(file_path: str) -> dict:
+    """
+    Opens the excel file and enters into Sheet1 and parses it with the function created to create a dictionary.
+
+    Args:
+        file_path: string path to excel file
+
+    Returns:
+        jurors: a dictionary with key: juror_id and value: juror_data
+    """
+    workbook = load_workbook_safe(file_path)
+    sheet    = workbook['Sheet1']
+    jurors   = parse_juror_sheet(sheet)
+
+    workbook.close()
+
+    print(f"SUCCESS: Loaded {len(jurors)} jurors")
+
+    return jurors
+
+
