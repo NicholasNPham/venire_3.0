@@ -172,4 +172,24 @@ def load_jurors(file_path: str) -> dict:
 
     return jurors
 
+def write_outcome(file_path: str, row: int, outcome: str) -> None:
+    """
+    Writes the outcome string to column D for the given row.
+    Saves and closes the workbook after writing.
+
+    Args:
+        file_path: string path to the Excel file ex: 'venire.xlsx'
+        row:       row number to write the outcome to
+        outcome:   result string to write ex: 'CH Found', 'Warning...', or ''
+
+    Returns:
+        None
+    """
+    workbook = load_workbook_safe(file_path)
+    sheet    = workbook['Sheet1']
+
+    sheet.cell(row=row, column=OUTCOME_COLUMN).value = outcome
+
+    workbook.save(file_path)
+    workbook.close()
 
