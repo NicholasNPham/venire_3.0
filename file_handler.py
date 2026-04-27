@@ -84,3 +84,18 @@ def read_progress():
     else:
         return None
 
+def build_pdf_path(screenshot_folder: str, juror_id: str, last_name: str, first_name: str) -> str:
+    """
+    Builds the full file path for a juror's PDF.
+
+    Args:
+        screenshot_folder: Folder where screenshots are saved ex: 'screenshots/2025-04-23'
+        juror_id:          Juror ID ex: '1042'
+        last_name:         Juror last name ex: 'Smith'
+        first_name:        Juror first name ex: 'John'
+
+    Returns:
+        Full path string ex: 'screenshots/2025-04-23/1042_Smith_John.pdf'
+    """
+    file_path = f"{juror_id}_{last_name}_{first_name}.pdf"
+    return os.path.join(screenshot_folder, file_path)
