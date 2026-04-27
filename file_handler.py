@@ -38,7 +38,7 @@ def create_results_folder() -> str:
     Returns the filepath for the results folder and makes the folder and checks to see if the folder exists.
 
     Returns:
-        Filepath to the screenshot folder ex: 'results/'
+        Filepath to the results folder ex: 'results/'
     """
     os.makedirs(RESULTS_ROOT, exist_ok=True)
     return RESULTS_ROOT
@@ -69,7 +69,7 @@ def save_progress(juror_id: str) -> None:
     with open(PROGRESS_FILE, 'w') as progress_file:
         progress_file.write(str(juror_id))
 
-def read_progress():
+def read_progress() -> str | None:
     """
     Reads the last completed juror ID from progress.txt.
 
