@@ -68,3 +68,19 @@ def save_progress(juror_id: str) -> None:
     """
     with open(PROGRESS_FILE, 'w') as progress_file:
         progress_file.write(str(juror_id))
+
+def read_progress():
+    """
+    Reads the last completed juror ID from progress.txt.
+
+    Returns:
+        Last completed juror ID ex: '1042'
+        None if no progress file exists yet
+    """
+    if os.path.exists(PROGRESS_FILE):
+        with open(PROGRESS_FILE, 'r') as progress_file:
+            juror_id = str(progress_file.read()).strip()
+            return juror_id
+    else:
+        return None
+
