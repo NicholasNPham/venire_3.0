@@ -44,8 +44,27 @@ def create_results_folder() -> str:
     return RESULTS_ROOT
 
 def setup_folders() -> dict:
+    """
+    Runs at startup to create all required folders.
+
+    Returns:
+        Dictionary with folder paths ex: {'screenshots': 'screenshots/2025-04-23', 'results': 'results'}
+    """
     screenshots_folder = create_screenshot_folder()
     results_folder = create_results_folder()
 
     print("SUCCESS: Loaded screenshots and results folders.")
     return {"screenshots": screenshots_folder, "results": results_folder}
+
+def save_progress(juror_id: str) -> None:
+    """
+    Saves the last completed juror ID to progress.txt so the program can resume if it crashes.
+
+    Args:
+        juror_id: The last completed juror ID ex: '1042'
+
+    Returns:
+        None
+    """
+    with open(PROGRESS_FILE, 'w') as progress_file:
+        progress_file.write(str(juror_id))
