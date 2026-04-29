@@ -20,13 +20,14 @@ Typical usage flow:
 4. Call `generate_pdf_from_page()` to capture the page as a PDF
 5. Call `save_pdf()` to persist the file
 6. Call `return_to_main_page()` to reset for the next iteration
+7. Call 'teardown_browser()' to close the browser
 
 Dependencies:
 - selenium (WebDriver automation)
 - ChromeDriver (compatible with installed Chrome version)
 
 Notes:
-- This module currently relies on global `driver` and `wait` instances.
+- driver and wait are passed explicitly as parameters to all functions that require them.
 - Intended for automation workflows such as batch juror processing.
 - Timing and element waits are managed using explicit waits and short delays.
 
@@ -104,7 +105,7 @@ def setup_browser() -> tuple:
 
     return (driver, wait)
 
-def input_juror_data(first_name, last_name, dob) -> None:
+def input_juror_data(driver, wait, first_name, last_name, dob) -> None:
     """
     Inputs juror search criteria into the form and submits the search.
 
@@ -128,7 +129,7 @@ def input_juror_data(first_name, last_name, dob) -> None:
     wait.until(EC.element_to_be_clickable((By.ID, DOB_FIELD_ID))).send_keys(dob)
     wait.until(EC.element_to_be_clickable((By.ID, SEARCH_BUTTON_ID))).click()
 
-def select_view_selection() -> None:
+def select_view_selection(wait) -> None:
     """
     Clicks the 'View Selected' button on the search results page.
 
@@ -140,7 +141,7 @@ def select_view_selection() -> None:
     """
     wait.until(EC.element_to_be_clickable((By.ID, VIEW_SELECTION_BUTTON_ID))).click()
 
-def generate_pdf_from_page() -> bytes:
+def generate_pdf_from_page(driver) -> bytes:
     """
     Generates a PDF of the current browser page using Chrome DevTools Protocol.
 
@@ -169,7 +170,7 @@ def save_pdf(file_bytes, file_path):
     with open(file_path, WRITE_BINARY_ACRONYM) as pdf_file:
         pdf_file.write(file_bytes)
 
-def return_to_main_page() -> None:
+def return_to_main_page(wait) -> None:
     """
     Navigates back to the main search page after viewing a case.
 
@@ -186,13 +187,26 @@ def return_to_main_page() -> None:
     wait.until(EC.element_to_be_clickable((By.ID, BACK_BUTTON_FROM_SELECTION_PAGE_ID))).click()
     wait.until(EC.element_to_be_clickable((By.ID, RESET_BUTTON_ID))).click()
 
-    time.sleep(WEBDRIVER_WAIT_TIMEOUT_SECONDS)
+    time.sleep(PAUSE_BETWEEN_ACTIONS_SECONDS)
 
+def teardown_browser(driver) -> None:
+    """
+    Closes the browser and ends the WebDriver session.
+
+    Args:
+        driver: The active Selenium WebDriver instance
+
+    Returns:
+        None
+    """
+    driver.quit()
 
 # TESTING ONLY
-driver, wait = setup_browser()
-input_juror_data(TEST_FIRST_NAME, TEST_LAST_NAME, TEST_DATE_OF_BIRTH)
-select_view_selection()
-pdf_bytes = generate_pdf_from_page()
-save_pdf(pdf_bytes, r"C:\Users\npham\PycharmProjects\venire_3.0\screenshots\ccis_output.pdf")
-return_to_main_page()
+if __name__ == "__main__":
+    driver, wait = setup_browser()
+    input_juror_data(driver, wait, TEST_FIRST_NAME, TEST_LAST_NAME, TEST_DATE_OF_BIRTH)
+    select_view_selection(wait)
+    pdf_bytes = generate_pdf_from_page(driver)
+    save_pdf(pdf_bytes, r"C:\Users\npham\PycharmProjects\venire_3.0\screenshots\ccis_output.pdf")
+    return_to_main_page(wait)
+    teardown_browser(driver)
