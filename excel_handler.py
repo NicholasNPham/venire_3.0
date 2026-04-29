@@ -14,6 +14,7 @@ NAME_COLUMN = 3
 DOB_COLUMN = 2
 JUROR_COLUMN = 1
 OUTCOME_COLUMN = 4
+OUTCOME_BAD_FORMAT = "Warning - Could not confirm if there were matches, please manually check"
 
 # PARSE CONSTANTS
 MAX_SPLIT_PARAMETER = 1
@@ -84,14 +85,15 @@ def format_dob(dob) -> str:
 
     return None
 
-def build_juror_from_row(sheet, row: int) -> tuple:
+def build_juror_from_row(sheet, row: int, file_path: str) -> tuple:
     """
     Reads one row from the sheet and builds a juror dictionary.
     Calls parse() and format_dob() to clean the data.
 
-    Args:
-        sheet: openpyxl worksheet object
-        row:   Row number to read from
+   Args:
+    sheet:     openpyxl worksheet object
+    row:       Row number to read from
+    file_path: Path to the Excel file ex: 'venire.xlsx'
 
     Returns:
         (juror_id, juror_data) as a tuple
@@ -113,7 +115,7 @@ def build_juror_from_row(sheet, row: int) -> tuple:
     if not first_name or not last_name or not formatted_dob:
 
         # DONT FORGET TO UNCOMMENT THIS WHEN RUNNING LIVE, ITS COMMENTED TO KEEP THE TEST EXCEL FILE THE SAME
-        # write_outcome(file_path, row, "Warning - Could not confirm if there were matches, please manually check")
+        write_outcome(file_path, row, OUTCOME_BAD_FORMAT)
 
         return None
 
@@ -126,7 +128,7 @@ def build_juror_from_row(sheet, row: int) -> tuple:
 
     return str(juror_id), juror_data # Creates the dictionary and uses the juror ID as the key and the juror data as the value of the dictionary
 
-def parse_juror_sheet(sheet) -> dict:
+def parse_juror_sheet(sheet, file_path: str) -> dict:
     """
     Loops through every row in the sheet and builds
     a dictionary of all valid jurors.
@@ -135,7 +137,8 @@ def parse_juror_sheet(sheet) -> dict:
     Skips any row that returns None.
 
     Args:
-        sheet: openpyxl worksheet object
+    sheet:     openpyxl worksheet object
+    file_path: Path to the Excel file ex: 'venire.xlsx'
 
     Returns:
         Dictionary of all valid jurors keyed by juror ID
@@ -148,7 +151,7 @@ def parse_juror_sheet(sheet) -> dict:
     jurors = {}
 
     for row in range(1, sheet.max_row + 1):  # start at top of the list, max data knows where the data ends on the list
-        result = build_juror_from_row(sheet, row)
+        result = build_juror_from_row(sheet, row, file_path)
         if result is None:  # skip empty or bad rows
             continue
         juror_id, juror_data = result # unpack the two things returned
@@ -168,7 +171,7 @@ def load_jurors(file_path: str) -> dict:
     """
     workbook = load_workbook_safe(file_path)
     sheet    = workbook['Sheet1']
-    jurors   = parse_juror_sheet(sheet)
+    jurors   = parse_juror_sheet(sheet, file_path)
 
     workbook.close()
 
