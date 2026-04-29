@@ -58,7 +58,7 @@ def setup_folders() -> dict:
 
 def save_progress(juror_id: str) -> None:
     """
-    Saves the last completed juror ID to progress.txt so the program can resume if it crashes.
+    Saves the last completed juror ID to progress.txt by writing to it so the program can resume if it crashes.
 
     Args:
         juror_id: The last completed juror ID ex: '1042'
@@ -79,7 +79,7 @@ def read_progress() -> str | None:
     """
     if os.path.exists(PROGRESS_FILE):
         with open(PROGRESS_FILE, 'r') as progress_file:
-            juror_id = str(progress_file.read()).strip()
+            juror_id = progress_file.read().strip()
             return juror_id
     else:
         return None
