@@ -160,8 +160,15 @@ def return_to_main_page(wait) -> None:
     """
     wait.until(EC.element_to_be_clickable((By.ID, BACK_BUTTON_FROM_PDF_PAGE_ID))).click()
     wait.until(EC.element_to_be_clickable((By.ID, BACK_BUTTON_FROM_SELECTION_PAGE_ID))).click()
-    wait.until(EC.element_to_be_clickable((By.ID, RESET_BUTTON_ID))).click()
 
+def reset_search(wait) -> None:
+    """
+    presses the reset button on the first page.
+
+    Returns:
+        None
+    """
+    wait.until(EC.element_to_be_clickable((By.ID, RESET_BUTTON_ID))).click()
     time.sleep(PAUSE_BETWEEN_ACTIONS_SECONDS)
 
 def check_for_no_results(driver) -> bool:
@@ -179,7 +186,6 @@ def check_for_no_results(driver) -> bool:
         return True
     except:
         return False
-
 
 def teardown_browser(driver) -> None:
     """
@@ -207,12 +213,13 @@ def teardown_browser(driver) -> None:
     # return_to_main_page(wait)
     # teardown_browser(driver)
 
-    # Test 2 - juror that DOES NOT EXIST
+    # # Test 2 - juror that DOES NOT EXIST
     # input_juror_data(driver, wait, "ZZZZZ", "ZZZZZ", "01/01/1900")
     # print(check_for_no_results(driver))  # should print True
+    # reset_search(wait)
     # select_view_selection(wait)
     # pdf_bytes = generate_pdf_from_page(driver)
     # save_pdf(pdf_bytes, r"C:\Users\npham\PycharmProjects\venire_3.0\screenshots\ccis_output.pdf")
     # return_to_main_page(wait)
     # teardown_browser(driver)
-    #
+
