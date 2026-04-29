@@ -84,7 +84,7 @@ def format_dob(dob) -> str:
 
     return None
 
-def build_juror_from_row(sheet, row: int, file_path: str) -> tuple:
+def build_juror_from_row(sheet, row: int) -> tuple:
     """
     Reads one row from the sheet and builds a juror dictionary.
     Calls parse() and format_dob() to clean the data.
@@ -126,7 +126,7 @@ def build_juror_from_row(sheet, row: int, file_path: str) -> tuple:
 
     return str(juror_id), juror_data # Creates the dictionary and uses the juror ID as the key and the juror data as the value of the dictionary
 
-def parse_juror_sheet(sheet, file_path: str) -> dict:
+def parse_juror_sheet(sheet) -> dict:
     """
     Loops through every row in the sheet and builds
     a dictionary of all valid jurors.
@@ -148,7 +148,7 @@ def parse_juror_sheet(sheet, file_path: str) -> dict:
     jurors = {}
 
     for row in range(1, sheet.max_row + 1):  # start at top of the list, max data knows where the data ends on the list
-        result = build_juror_from_row(sheet, row, file_path)
+        result = build_juror_from_row(sheet, row)
         if result is None:  # skip empty or bad rows
             continue
         juror_id, juror_data = result # unpack the two things returned
@@ -168,7 +168,7 @@ def load_jurors(file_path: str) -> dict:
     """
     workbook = load_workbook_safe(file_path)
     sheet    = workbook['Sheet1']
-    jurors   = parse_juror_sheet(sheet, file_path)
+    jurors   = parse_juror_sheet(sheet)
 
     workbook.close()
 
