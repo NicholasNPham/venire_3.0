@@ -1,37 +1,9 @@
-"""CCIS Web Scraper Module
+"""
+CCIS Web Scraper Module
 
 This module automates interaction with the CCIS web application using Selenium.
 It handles login, juror search input, result navigation, and PDF generation
 of case summary pages.
-
-Core functionality includes:
-- Initializing and configuring a Selenium WebDriver session
-- Authenticating into the target website
-- Submitting juror search criteria (name and date of birth)
-- Navigating search results and selecting records
-- Generating PDF snapshots of result pages via Chrome DevTools Protocol
-- Saving PDF outputs to disk
-- Resetting the application state for repeated queries
-
-Typical usage flow:
-1. Call `setup_browser()` to initialize and log in
-2. Call `input_juror_data()` to perform a search
-3. Call `select_view_selection()` to open the result
-4. Call `generate_pdf_from_page()` to capture the page as a PDF
-5. Call `save_pdf()` to persist the file
-6. Call `return_to_main_page()` to reset for the next iteration
-7. Call 'teardown_browser()' to close the browser
-
-Dependencies:
-- selenium (WebDriver automation)
-- ChromeDriver (compatible with installed Chrome version)
-
-Notes:
-- driver and wait are passed explicitly as parameters to all functions that require them.
-- Intended for automation workflows such as batch juror processing.
-- Timing and element waits are managed using explicit waits and short delays.
-
-Author: Nicholas Pham
 """
 
 # Standard Library Imports
@@ -51,6 +23,7 @@ from key import WEBSITE, CHROME_PATH, USERNAME, PASSWORD, TEST_FIRST_NAME, TEST_
 # CONSTANTS
 PAUSE_BETWEEN_ACTIONS_SECONDS = 1
 WEBDRIVER_WAIT_TIMEOUT_SECONDS = 5
+NO_RESULTS_WAIT_TIMEOUT_SECONDS = 1
 WRITE_BINARY_ACRONYM = "wb"
 PRINT_TO_PDF_WEBTOOL_COMMAND = "Page.printToPDF"
 PDF_DATA_STRING = 'data'
@@ -67,6 +40,8 @@ LAST_NAME_FIELD_ID = "search_tab:personForm:lastname"
 FIRST_NAME_FIELD_ID = "search_tab:personForm:fname"
 DOB_FIELD_ID = "search_tab:personForm:dob_input"
 SEARCH_BUTTON_ID = "search_tab:personForm:j_idt158"
+
+NO_RESULTS_MESSAGE_XPATH = "//span[@class='ui-messages-info-detail' and text()='No matches found.']"
 
 VIEW_SELECTION_BUTTON_ID = "searchPartyResults:viewSelectedButton"
 
@@ -189,6 +164,23 @@ def return_to_main_page(wait) -> None:
 
     time.sleep(PAUSE_BETWEEN_ACTIONS_SECONDS)
 
+def check_for_no_results(driver) -> bool:
+    """
+    Checks if the 'no matches found' popup appeared after a search.
+
+    Returns:
+        True if no results found
+        False if results are present
+    """
+    short_wait = WebDriverWait(driver, NO_RESULTS_WAIT_TIMEOUT_SECONDS)
+
+    try:
+        short_wait.until(EC.visibility_of_element_located((By.XPATH, NO_RESULTS_MESSAGE_XPATH)))
+        return True
+    except:
+        return False
+
+
 def teardown_browser(driver) -> None:
     """
     Closes the browser and ends the WebDriver session.
@@ -202,11 +194,25 @@ def teardown_browser(driver) -> None:
     driver.quit()
 
 # TESTING ONLY
-if __name__ == "__main__":
-    driver, wait = setup_browser()
-    input_juror_data(driver, wait, TEST_FIRST_NAME, TEST_LAST_NAME, TEST_DATE_OF_BIRTH)
-    select_view_selection(wait)
-    pdf_bytes = generate_pdf_from_page(driver)
-    save_pdf(pdf_bytes, r"C:\Users\npham\PycharmProjects\venire_3.0\screenshots\ccis_output.pdf")
-    return_to_main_page(wait)
-    teardown_browser(driver)
+
+# if __name__ == "__main__":
+#     driver, wait = setup_browser()
+
+    # # Test 1 - juror that EXISTS
+    # input_juror_data(driver, wait, TEST_FIRST_NAME, TEST_LAST_NAME, TEST_DATE_OF_BIRTH)
+    # print(check_for_no_results(driver))  # should print False
+    # select_view_selection(wait)
+    # pdf_bytes = generate_pdf_from_page(driver)
+    # save_pdf(pdf_bytes, r"C:\Users\npham\PycharmProjects\venire_3.0\screenshots\ccis_output.pdf")
+    # return_to_main_page(wait)
+    # teardown_browser(driver)
+
+    # Test 2 - juror that DOES NOT EXIST
+    # input_juror_data(driver, wait, "ZZZZZ", "ZZZZZ", "01/01/1900")
+    # print(check_for_no_results(driver))  # should print True
+    # select_view_selection(wait)
+    # pdf_bytes = generate_pdf_from_page(driver)
+    # save_pdf(pdf_bytes, r"C:\Users\npham\PycharmProjects\venire_3.0\screenshots\ccis_output.pdf")
+    # return_to_main_page(wait)
+    # teardown_browser(driver)
+    #
