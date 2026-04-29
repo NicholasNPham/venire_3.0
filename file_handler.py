@@ -84,6 +84,16 @@ def read_progress() -> str | None:
     else:
         return None
 
+def delete_progress() -> None:
+    """
+    Deletes the progress file once the full juror list has been completed.
+
+    Returns:
+        None
+    """
+    if os.path.exists(PROGRESS_FILE):
+        os.remove(PROGRESS_FILE)
+
 def build_pdf_path(screenshot_folder: str, juror_id: str, last_name: str, first_name: str) -> str:
     """
     Builds the full file path for a juror's PDF.
