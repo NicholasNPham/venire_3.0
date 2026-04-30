@@ -9,7 +9,7 @@ from excel_handler import load_jurors, write_outcome
 from file_handler import setup_folders, build_pdf_path, save_progress, read_progress, delete_progress
 
 # CONSTANT
-EXCEL_FILE = "TEST VENIRE EXCEL.xlsx"
+EXCEL_FILE = "VENIRE.xlsx"
 
 # OUTCOME CONSTANTS
 OUTCOME_NO_RESULTS = "No matches found"
