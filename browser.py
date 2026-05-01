@@ -197,6 +197,7 @@ def teardown_browser(driver) -> None:
     Returns:
         None
     """
+    print("FINISHED VENIRE EXCEL")
     driver.quit()
 
 # TESTING ONLY
