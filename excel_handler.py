@@ -169,6 +169,11 @@ def load_jurors(file_path: str) -> dict:
     Returns:
         jurors: a dictionary with key: juror_id and value: juror_data
     """
+
+    print("SCANNING VENIRE EXCEL...")
+    print("PROCESS ESTIMATED 10 Minutes. Please Wait...")
+    print("DO NOT END PROCESS. IT WILL CORRUPT THE VENIRE EXCEL SHEET")
+
     workbook = load_workbook_safe(file_path)
     sheet    = workbook['Sheet1']
     jurors   = parse_juror_sheet(sheet, file_path)
