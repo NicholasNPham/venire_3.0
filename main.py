@@ -36,7 +36,7 @@ def main():
     # MAIN LOOP
     completed = False
     try:
-        for juror_id, data in jurors.items():
+        for i, (juror_id, data) in enumerate(jurors.items(), start=1):
 
             # SKIP UNTIL WE PASS LAST COMPLETED
             if skip:
@@ -45,6 +45,7 @@ def main():
                 continue
 
             try:
+                print(f"{i}/{len(jurors)}")
                 input_juror_data(driver, wait, data['first_name'], data['last_name'], data['dob']) # SEARCH
                 is_no_result_found = check_for_no_results(driver) # CHECK FOR NO RESULTS
                 # IF NO RESULTS — write outcome, reset, next juror
