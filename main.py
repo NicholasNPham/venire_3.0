@@ -7,9 +7,10 @@ Purpose: Main loop for Venire Automation
 from browser import setup_browser, input_juror_data, check_for_no_results, select_view_selection, generate_pdf_from_page, save_pdf, return_to_main_page, reset_search, teardown_browser
 from excel_handler import load_jurors, write_outcome
 from file_handler import setup_folders, build_pdf_path, save_progress, read_progress, delete_progress
+from report_builder import prompt_and_combine
 
 # CONSTANT
-EXCEL_FILE = "VENIRE.xlsx"
+EXCEL_FILE = "TEST VENIRE EXCEL.xlsx"
 
 # OUTCOME CONSTANTS
 OUTCOME_NO_RESULTS = "No matches found"
@@ -75,6 +76,7 @@ def main():
         if completed:
             delete_progress()
         teardown_browser(driver) # ALWAYS RUN NO MATTER WHAT
+        prompt_and_combine(folders["screenshots"], EXCEL_FILE)
 
 if __name__ == "__main__":
     main()
