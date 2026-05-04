@@ -24,7 +24,6 @@ from key import WEBSITE, CHROME_PATH, USERNAME, PASSWORD, TEST_FIRST_NAME, TEST_
 PAUSE_BETWEEN_ACTIONS_SECONDS = 1
 WEBDRIVER_WAIT_TIMEOUT_SECONDS = 5
 NO_RESULTS_WAIT_TIMEOUT_SECONDS = 1
-WRITE_BINARY_ACRONYM = "wb"
 PRINT_TO_PDF_WEBTOOL_COMMAND = "Page.printToPDF"
 PDF_DATA_STRING = 'data'
 PRINT_BACKGROUND_KEY = "printBackground"
@@ -142,7 +141,7 @@ def save_pdf(file_bytes, file_path):
     Returns:
         None
     """
-    with open(file_path, WRITE_BINARY_ACRONYM) as pdf_file:
+    with open(file_path, "wb") as pdf_file:
         pdf_file.write(file_bytes)
 
 def return_to_main_page(wait) -> None:
@@ -184,7 +183,8 @@ def check_for_no_results(driver) -> bool:
     try:
         short_wait.until(EC.visibility_of_element_located((By.XPATH, NO_RESULTS_MESSAGE_XPATH)))
         return True
-    except:
+    except Exception as e:
+        print(e)
         return False
 
 def teardown_browser(driver) -> None:
