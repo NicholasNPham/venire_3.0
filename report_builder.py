@@ -11,7 +11,6 @@ from reportlab.platypus import SimpleDocTemplate, Table
 from pypdf import PdfWriter, PdfReader
 
 # CONSTANT
-WRITE_BINARY_ACRONYM = "wb"
 ALL_PDF_FILENAME_EXTENSION = "*.pdf"
 VENIRE_EXCEL_PDF_FILENAME = "VENIRE_EXCEL_REPORT.pdf"
 VENIRE_FINAL_REPORT = "VENIRE_FINAL_REPORT.pdf"
@@ -39,6 +38,8 @@ def excel_to_pdf(excel_path: str, output_pdf_path: str) -> str:
     data = []
     for row in worksheet.iter_rows(values_only=True):
         data.append([str(cell) if cell is not None else "" for cell in row])
+
+    workbook.close()
 
     document = SimpleDocTemplate(output_pdf_path, pagesize=letter)
 
@@ -68,7 +69,7 @@ def merge_pdfs(pdf_paths: list[str], output_path: str) -> str:
         for page in reader.pages:
             writer.add_page(page)
 
-    with open(output_path, WRITE_BINARY_ACRONYM) as file:
+    with open(output_path, "wb") as file:
         writer.write(file)
 
     return output_path
