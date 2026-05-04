@@ -76,6 +76,8 @@ def main():
         if completed:
             delete_progress()
         teardown_browser(driver) # ALWAYS RUN NO MATTER WHAT
+
+    if completed:
         prompt_and_combine(folders["screenshots"], EXCEL_FILE)
 
 if __name__ == "__main__":
