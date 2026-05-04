@@ -18,6 +18,19 @@ VENIRE_FINAL_REPORT = "VENIRE_FINAL_REPORT.pdf"
 
 #FUNCTION
 def excel_to_pdf(excel_path: str, output_pdf_path: str) -> str:
+    """
+    Converts an Excel file to a PDF table.
+
+    Args:
+        excel_path: Path to the .xlsx file.
+        output_pdf_path: Where to save the resulting PDF.
+
+    Returns:
+        The output_pdf_path on success.
+
+    Example:
+        excel_to_pdf("results/jurors.xlsx", "results/jurors_report.pdf")
+    """
     if not os.path.exists(excel_path): # If the file path does not exist is not there.
         raise FileNotFoundError(f"File not found: {excel_path}") # Raise an error if the Excel sheet cannot be found.
     workbook = load_workbook(excel_path)
@@ -61,6 +74,19 @@ def merge_pdfs(pdf_paths: list[str], output_path: str) -> str:
     return output_path
 
 def prompt_and_combine(results_folder: str, excel_path: str) -> None:
+    """
+    Prompts the user to combine all juror PDFs and the Excel report into one file.
+
+    Args:
+        results_folder: Folder containing all juror PDFs.
+        excel_path: Path to the completed Excel sheet.
+
+    Returns:
+        None
+
+    Example:
+        prompt_and_combine("results/2024-01-15/screenshots", "jurors.xlsx")
+    """
     answer = input("Do you wish to combine the Excel report and all juror PDFs into one? (y/n): ").strip().lower()
 
     if answer != "y":
