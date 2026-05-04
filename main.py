@@ -66,6 +66,7 @@ def main():
                     reset_search(wait)
 
             except Exception as e:
+                print(f"Error on juror {juror_id}: {e}")
                 write_outcome(EXCEL_FILE, data["row"], OUTCOME_ERROR)
                 reset_search(wait)
                 continue
