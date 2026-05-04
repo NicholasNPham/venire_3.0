@@ -50,7 +50,6 @@ def merge_pdfs(pdf_paths: list[str], output_path: str) -> str:
     writer = PdfWriter()
 
     for path in pdf_paths:
-        # TODO: open each with PdfReader, loop its pages, add each to writer
         reader = PdfReader(path)
 
         for page in reader.pages:
@@ -59,7 +58,6 @@ def merge_pdfs(pdf_paths: list[str], output_path: str) -> str:
     with open(output_path, WRITE_BINARY_ACRONYM) as file:
         writer.write(file)
 
-    # TODO: write the result to output_path
     return output_path
 
 def prompt_and_combine(results_folder: str, excel_path: str) -> None:
