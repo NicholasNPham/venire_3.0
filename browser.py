@@ -6,9 +6,14 @@ It handles login, juror search input, result navigation, and PDF generation
 of case summary pages.
 """
 
+# Local Imports
+from key import WEBSITE, CHROME_PATH, USERNAME, PASSWORD
+from logger import setup_logger
+
 # Standard Library Imports
 import time
 import base64
+import logging
 
 # Third-party Imports
 from selenium import webdriver # 4.43.0
@@ -16,9 +21,6 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-
-# Local Imports
-from key import WEBSITE, CHROME_PATH, USERNAME, PASSWORD, TEST_FIRST_NAME, TEST_LAST_NAME, TEST_DATE_OF_BIRTH
 
 # CONSTANTS
 PAUSE_BETWEEN_ACTIONS_SECONDS = 1
@@ -49,7 +51,7 @@ BACK_BUTTON_FROM_SELECTION_PAGE_ID = "j_idt111"
 RESET_BUTTON_ID = "search_tab:personForm:j_idt159"
 
 # FUNCTIONS
-def setup_browser() -> tuple:
+def setup_browser(log: logging.Logger) -> tuple:
     """
     Initializes the Selenium WebDriver, logs into the target website,
     and navigates to the main search page.
@@ -76,6 +78,7 @@ def setup_browser() -> tuple:
     wait.until(EC.element_to_be_clickable((By.ID, PASSWORD_FIELD_ID))).send_keys(PASSWORD) # finds password field and enters password
     driver.find_element(By.ID, SUBMIT_LOGIN_BUTTON_ID).click() # clicks submit to log in.
     wait.until(EC.presence_of_element_located((By.ID, LAST_NAME_FIELD_ID)))
+    log.info("Browser started successfully")
 
     return (driver, wait)
 
@@ -170,7 +173,7 @@ def reset_search(wait) -> None:
     wait.until(EC.element_to_be_clickable((By.ID, RESET_BUTTON_ID))).click()
     time.sleep(PAUSE_BETWEEN_ACTIONS_SECONDS)
 
-def check_for_no_results(driver) -> bool:
+def check_for_no_results(driver, log: logging.Logger) -> bool:
     """
     Checks if the 'no matches found' popup appeared after a search.
 
@@ -183,11 +186,11 @@ def check_for_no_results(driver) -> bool:
     try:
         short_wait.until(EC.visibility_of_element_located((By.XPATH, NO_RESULTS_MESSAGE_XPATH)))
         return True
-    except Exception as e:
-        print(e)
+    except Exception:
+        log.debug(f"No 'no results' banner detected — assuming results present")
         return False
 
-def teardown_browser(driver) -> None:
+def teardown_browser(driver, log: logging.Logger) -> None:
     """
     Closes the browser and ends the WebDriver session.
 
@@ -197,7 +200,7 @@ def teardown_browser(driver) -> None:
     Returns:
         None
     """
-    print("FINISHED VENIRE EXCEL")
+    log.info("FINISHED VENIRE EXCEL")
     driver.quit()
 
 # TESTING ONLY

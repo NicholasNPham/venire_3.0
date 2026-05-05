@@ -1,14 +1,15 @@
 # Report Builder
 
-# STANDARD LIBRARY IMPORTS
-import os
-from pathlib import Path
-
 # THIRD-PARTY IMPORTS
 from openpyxl import load_workbook
 from reportlab.lib.pagesizes import letter
 from reportlab.platypus import SimpleDocTemplate, Table
 from pypdf import PdfWriter, PdfReader
+
+# STANDARD LIBRARY IMPORTS
+import os
+from pathlib import Path
+import logging
 
 # CONSTANT
 ALL_PDF_FILENAME_EXTENSION = "*.pdf"
@@ -74,7 +75,7 @@ def merge_pdfs(pdf_paths: list[str], output_path: str) -> str:
 
     return output_path
 
-def prompt_and_combine(results_folder: str, excel_path: str) -> None:
+def prompt_and_combine(results_folder: str, excel_path: str, log: logging.Logger) -> None:
     """
     Prompts the user to combine all juror PDFs and the Excel report into one file.
 
@@ -91,7 +92,7 @@ def prompt_and_combine(results_folder: str, excel_path: str) -> None:
     answer = input("Do you wish to combine the Excel report and all juror PDFs into one? (y/n): ").strip().lower()
 
     if answer != "y":
-        print("Left alone — no changes made.")
+        log.info("Left alone — no changes made.")
         return
 
     results_path = Path(results_folder)
@@ -102,7 +103,7 @@ def prompt_and_combine(results_folder: str, excel_path: str) -> None:
     juror_pdfs = sorted(results_path.glob(ALL_PDF_FILENAME_EXTENSION))
 
     if not juror_pdfs:
-        print("No PDF files found in the results folder.")
+        log.error("No PDF files found in the results folder.")
         return
 
     excel_pdf_path = results_path / VENIRE_EXCEL_PDF_FILENAME
@@ -117,4 +118,4 @@ def prompt_and_combine(results_folder: str, excel_path: str) -> None:
     if excel_pdf_path.exists():
         excel_pdf_path.unlink()
 
-    print(f"Combined PDF created at: {output_path}")
+    log.info(f"Combined PDF created at: {output_path}")

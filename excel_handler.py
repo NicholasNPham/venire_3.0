@@ -5,6 +5,7 @@ Purpose: Handles all Excel read and write operations for Venire Automation
 
 # Standard Library Imports
 import os
+import logging
 
 # Third-Party Library Imports
 import openpyxl # 3.1.5
@@ -159,7 +160,7 @@ def parse_juror_sheet(sheet, file_path: str) -> dict:
 
     return jurors
 
-def load_jurors(file_path: str) -> dict:
+def load_jurors(file_path: str, log: logging.Logger) -> dict:
     """
     Opens the excel file and enters into Sheet1 and parses it with the function created to create a dictionary.
 
@@ -170,9 +171,9 @@ def load_jurors(file_path: str) -> dict:
         jurors: a dictionary with key: juror_id and value: juror_data
     """
 
-    print("SCANNING VENIRE EXCEL...")
-    print("PROCESS ESTIMATED 10 Minutes. Please Wait...")
-    print("DO NOT END PROCESS. IT WILL CORRUPT THE VENIRE EXCEL SHEET")
+    log.info("SCANNING VENIRE EXCEL...")
+    log.info("PROCESS ESTIMATED 10 Minutes. Please Wait...")
+    log.info("DO NOT END PROCESS. IT WILL CORRUPT THE VENIRE EXCEL SHEET")
 
     workbook = load_workbook_safe(file_path)
     sheet    = workbook['Sheet1']
@@ -180,7 +181,7 @@ def load_jurors(file_path: str) -> dict:
 
     workbook.close()
 
-    print(f"SUCCESS: Loaded {len(jurors)} jurors")
+    log.info(f"SUCCESS: Loaded {len(jurors)} jurors")
 
     return jurors
 

@@ -53,7 +53,6 @@ def setup_folders() -> dict:
     screenshots_folder = create_screenshot_folder()
     results_folder = create_results_folder()
 
-    print("SUCCESS: Loaded screenshots and results folders.")
     return {"screenshots": screenshots_folder, "results": results_folder}
 
 def save_progress(juror_id: str) -> None:
