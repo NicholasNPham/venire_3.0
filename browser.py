@@ -53,34 +53,61 @@ RESET_BUTTON_ID = "search_tab:personForm:j_idt159"
 # FUNCTIONS
 def setup_browser(log: logging.Logger) -> tuple:
     """
-    Initializes the Selenium WebDriver, logs into the target website,
-    and navigates to the main search page.
+    Launches a Chrome browser instance and returns the driver and wait objects.
 
     The function:
-    - Launches a Chrome browser instance
-    - Navigates to the configured website
-    - Logs in using provided credentials
-    - Waits until the search page is fully loaded
+    - Creates a Chrome WebDriver using the configured Chrome path
+    - Initializes a WebDriverWait instance with the default timeout
+
+    Args:
+        log (logging.Logger): Logger instance for recording browser startup
 
     Returns:
         tuple[WebDriver, WebDriverWait]:
             A tuple containing:
             - driver: The active Selenium WebDriver instance
             - wait: WebDriverWait instance for handling explicit waits
+
+    Example:
+        driver, wait = setup_browser(log)
     """
     service = Service(CHROME_PATH)
     driver = webdriver.Chrome(service=service)
     wait = WebDriverWait(driver, WEBDRIVER_WAIT_TIMEOUT_SECONDS)
-    driver.get(WEBSITE) # opens to the website.
-    driver.maximize_window() # maximizes the web driver
-    # LOGIN PATH
-    wait.until(EC.element_to_be_clickable((By.ID, USERNAME_FIELD_ID))).send_keys(USERNAME) # finds username field enters username
-    wait.until(EC.element_to_be_clickable((By.ID, PASSWORD_FIELD_ID))).send_keys(PASSWORD) # finds password field and enters password
-    driver.find_element(By.ID, SUBMIT_LOGIN_BUTTON_ID).click() # clicks submit to log in.
-    wait.until(EC.presence_of_element_located((By.ID, LAST_NAME_FIELD_ID)))
-    log.info("Browser started successfully")
 
     return (driver, wait)
+
+def login(driver, wait, log: logging.Logger):
+    """
+    Navigates to the target website and logs in using stored credentials.
+
+    The function:
+    - Opens the configured website URL
+    - Enters username and password from key.py
+    - Submits the login form
+    - Waits until the search page is fully loaded to confirm success
+
+    Args:
+        driver: The active Selenium WebDriver instance
+        wait: WebDriverWait instance for handling explicit waits
+        log (logging.Logger): Logger instance for recording login status
+
+    Returns:
+        None
+
+    Example:
+        login(driver, wait, log)
+    """
+    # WEBSITE
+    driver.get(WEBSITE)  # opens to the website.
+    driver.maximize_window()  # maximizes the web driver
+    log.info("Browser started successfully")
+    # LOGIN
+    wait.until(EC.element_to_be_clickable((By.ID, USERNAME_FIELD_ID))).send_keys(USERNAME)  # finds username field enters username
+    wait.until(EC.element_to_be_clickable((By.ID, PASSWORD_FIELD_ID))).send_keys(PASSWORD)  # finds password field and enters password
+    driver.find_element(By.ID, SUBMIT_LOGIN_BUTTON_ID).click()  # clicks submit to log in.
+    wait.until(EC.presence_of_element_located((By.ID, LAST_NAME_FIELD_ID)))
+    log.info("Logged in successfully")
 
 def input_juror_data(driver, wait, first_name, last_name, dob) -> None:
     """
