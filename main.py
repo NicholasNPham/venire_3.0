@@ -4,7 +4,7 @@ Purpose: Main loop for Venire Automation
 """
 
 # LOCAL IMPORTS
-from browser import setup_browser, input_juror_data, check_for_no_results, select_view_selection, generate_pdf_from_page, save_pdf, return_to_main_page, reset_search, teardown_browser
+from browser import setup_browser, login, input_juror_data, check_for_no_results, select_view_selection, generate_pdf_from_page, save_pdf, return_to_main_page, reset_search, teardown_browser
 from excel_handler import load_jurors, write_outcome
 from file_handler import setup_folders, build_pdf_path, save_progress, read_progress, delete_progress
 from report_builder import prompt_and_combine
@@ -41,8 +41,9 @@ def main():
     jurors = load_jurors(EXCEL_FILE, log)
     log.info("Folders and jurors loaded successfully")
 
-    # SETUP - BROWSER
+    # SETUP - BROWSER -> LOGIN
     driver, wait = setup_browser(log)
+    login(driver, wait, log)
 
     # SET DEFAULT OUTCOME FOR ALL JURORS BEFORE LOOP STARTS
     for juror_id, data in jurors.items():
