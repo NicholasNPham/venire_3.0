@@ -9,13 +9,15 @@ from excel_handler import load_jurors, write_outcome
 from file_handler import setup_folders, build_pdf_path, save_progress, read_progress, delete_progress
 from report_builder import prompt_and_combine
 from logger import setup_logger
+from config import load_config
 
 # STANDARD LIBRARY IMPORTS
 import os
 from datetime import date
 
 # CONSTANT
-EXCEL_FILE = "VENIRE.xlsx"
+EXCEL_FILE: str = "VENIRE.xlsx"
+JSON_FILE: str = "config.json"
 
 # OUTCOME CONSTANTS
 OUTCOME_NO_RESULTS = "No matches found"
@@ -28,9 +30,12 @@ def main():
     # SETUP - RUN ONCE
     folders = setup_folders()
 
-    # LOG FILES - SETUP
+    # SETUP - LOG FILES
     log_path = os.path.join(folders["screenshots"], f"{date.today().strftime('%Y-%m-%d')}.log")
     log = setup_logger(log_path)
+
+    # SETUP - CONFIG JSON FILE
+    config = load_config(JSON_FILE)
 
     # SETUP - RUN ONCE
     jurors = load_jurors(EXCEL_FILE, log)
