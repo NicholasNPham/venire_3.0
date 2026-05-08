@@ -9,6 +9,7 @@ of case summary pages.
 # Local Imports
 from key import WEBSITE, CHROME_PATH, USERNAME, PASSWORD
 from logger import setup_logger
+from config import LoginConfig, SearchConfig
 
 # Standard Library Imports
 import time
@@ -21,6 +22,7 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.remote.webdriver import WebDriver
 
 # CONSTANTS
 PAUSE_BETWEEN_ACTIONS_SECONDS = 1
@@ -77,36 +79,39 @@ def setup_browser(log: logging.Logger) -> tuple:
 
     return (driver, wait)
 
-def login(driver, wait, log: logging.Logger):
+def login(driver: WebDriver, wait: WebDriverWait, log: logging.Logger, login_config: LoginConfig, post_login_element_id: str ) -> None:
     """
     Navigates to the target website and logs in using stored credentials.
 
     The function:
     - Opens the configured website URL
+    - Maximizes the browser window
     - Enters username and password from key.py
     - Submits the login form
-    - Waits until the search page is fully loaded to confirm success
+    - Waits for the post-login element to confirm the search page loaded
 
     Args:
-        driver: The active Selenium WebDriver instance
-        wait: WebDriverWait instance for handling explicit waits
+        driver (WebDriver): The active Selenium WebDriver instance
+        wait (WebDriverWait): WebDriverWait instance for handling explicit waits
         log (logging.Logger): Logger instance for recording login status
+        login_config (LoginConfig): Dataclass containing login form element IDs
+        post_login_element_id (str): Element ID confirming successful login
 
     Returns:
         None
 
     Example:
-        login(driver, wait, log)
+        login(driver, wait, log, login_config, post_login_element_id)
     """
     # WEBSITE
     driver.get(WEBSITE)  # opens to the website.
     driver.maximize_window()  # maximizes the web driver
     log.info("Browser started successfully")
     # LOGIN
-    wait.until(EC.element_to_be_clickable((By.ID, USERNAME_FIELD_ID))).send_keys(USERNAME)  # finds username field enters username
-    wait.until(EC.element_to_be_clickable((By.ID, PASSWORD_FIELD_ID))).send_keys(PASSWORD)  # finds password field and enters password
-    driver.find_element(By.ID, SUBMIT_LOGIN_BUTTON_ID).click()  # clicks submit to log in.
-    wait.until(EC.presence_of_element_located((By.ID, LAST_NAME_FIELD_ID)))
+    wait.until(EC.element_to_be_clickable((By.ID, login_config.username_field))).send_keys(USERNAME)  # finds username field enters username
+    wait.until(EC.element_to_be_clickable((By.ID, login_config.password_field))).send_keys(PASSWORD)  # finds password field and enters password
+    driver.find_element(By.ID, login_config.submit_login_button).click()  # clicks submit to log in.
+    wait.until(EC.presence_of_element_located((By.ID, post_login_element_id)))
     log.info("Logged in successfully")
 
 def input_juror_data(driver, wait, first_name, last_name, dob) -> None:
