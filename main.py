@@ -43,7 +43,7 @@ def main():
 
     # SETUP - BROWSER -> LOGIN
     driver, wait = setup_browser(log)
-    login(driver, wait, log)
+    login(driver, wait, log, config.browser.login, config.browser.search.last_name_field)
 
     # SET DEFAULT OUTCOME FOR ALL JURORS BEFORE LOOP STARTS
     for juror_id, data in jurors.items():
