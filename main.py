@@ -42,7 +42,7 @@ def main():
     log.info("Folders and jurors loaded successfully")
 
     # SETUP - BROWSER -> LOGIN
-    driver, wait = setup_browser(log)
+    driver, wait = setup_browser(config.browser.seconds)
     login(driver, wait, log, config.browser.login, config.browser.search.last_name_field)
 
     # SET DEFAULT OUTCOME FOR ALL JURORS BEFORE LOOP STARTS
@@ -68,11 +68,11 @@ def main():
             try:
                 log.info(f"{i}/{len(jurors)}")
                 input_juror_data(driver, wait, data['first_name'], data['last_name'], data['dob'], config.browser.search) # SEARCH
-                is_no_result_found = check_for_no_results(driver, log, config.browser.search) # CHECK FOR NO RESULTS
+                is_no_result_found = check_for_no_results(driver, log, config.browser.search, config.browser.seconds) # CHECK FOR NO RESULTS
                 # IF NO RESULTS — write outcome, reset, next juror
                 if is_no_result_found:
                     write_outcome(EXCEL_FILE, data['row'],OUTCOME_NO_RESULTS)
-                    reset_search(wait, config.browser.navigation)
+                    reset_search(wait, config.browser.navigation, config.browser.seconds)
                     continue
                 # IF RESULTS — select, generate pdf, save pdf, write outcome
                 else:
@@ -83,12 +83,12 @@ def main():
                     write_outcome(EXCEL_FILE, data["row"], OUTCOME_COMPLETE)
                     return_to_main_page(wait, config.browser.navigation)
                     save_progress(juror_id)
-                    reset_search(wait, config.browser.navigation)
+                    reset_search(wait, config.browser.navigation, config.browser.seconds)
 
             except Exception as e:
                 log.error(f"Error on juror {juror_id}: {e}")
                 write_outcome(EXCEL_FILE, data["row"], OUTCOME_ERROR)
-                reset_search(wait, config.browser.navigation)
+                reset_search(wait, config.browser.navigation, config.browser.seconds)
                 continue
 
         completed = True
