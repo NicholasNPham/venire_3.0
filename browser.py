@@ -32,26 +32,6 @@ PRINT_TO_PDF_WEBTOOL_COMMAND = "Page.printToPDF"
 PDF_DATA_STRING = 'data'
 PRINT_BACKGROUND_KEY = "printBackground"
 
-# HTML CONSTANTS
-USERNAME_FIELD_ID = "loginForm:username"
-PASSWORD_FIELD_ID = "loginForm:password"
-SUBMIT_LOGIN_BUTTON_ID = "loginForm:login"
-
-EXCLUDE_ATTORNEYS_CHECKBOX_XPATH = "//label[@for='search_tab:personForm:nameTypes:0']"
-EXCLUDE_JUDGES_CHECKBOX_XPATH = "//label[@for='search_tab:personForm:nameTypes:1']"
-LAST_NAME_FIELD_ID = "search_tab:personForm:lastname"
-FIRST_NAME_FIELD_ID = "search_tab:personForm:fname"
-DOB_FIELD_ID = "search_tab:personForm:dob_input"
-SEARCH_BUTTON_ID = "search_tab:personForm:j_idt158"
-
-NO_RESULTS_MESSAGE_XPATH = "//span[@class='ui-messages-info-detail' and text()='No matches found.']"
-
-VIEW_SELECTION_BUTTON_ID = "searchPartyResults:viewSelectedButton"
-
-BACK_BUTTON_FROM_PDF_PAGE_ID = "caseSummary:j_idt114"
-BACK_BUTTON_FROM_SELECTION_PAGE_ID = "j_idt111"
-RESET_BUTTON_ID = "search_tab:personForm:j_idt159"
-
 # FUNCTIONS
 def setup_browser(log: logging.Logger) -> tuple:
     """
