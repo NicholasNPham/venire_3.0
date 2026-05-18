@@ -66,6 +66,7 @@ def main():
                 # IF NO RESULTS — write outcome, reset, next juror
                 if is_no_result_found:
                     write_outcome(config.app.excel_file, data['row'], config.app.outcome_no_results)
+                    save_progress(juror_id)
                     reset_search(wait, config.browser.navigation, config.browser.seconds)
                     continue
                 # IF RESULTS — select, generate pdf, save pdf, write outcome
