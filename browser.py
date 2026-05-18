@@ -7,7 +7,7 @@ of case summary pages.
 """
 
 # Local Imports
-from key import WEBSITE, CHROME_PATH, USERNAME, PASSWORD
+from key import WEBSITE, USERNAME, PASSWORD
 from config import LoginConfig, SearchConfig, ResultsConfig, NavigationConfig, SecondsConfig
 
 # Standard Library Imports
@@ -22,6 +22,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.remote.webdriver import WebDriver
+from webdriver_manager.chrome import ChromeDriverManager
 
 # CONSTANTS
 PRINT_TO_PDF_WEBTOOL_COMMAND = "Page.printToPDF"
@@ -34,7 +35,7 @@ def setup_browser(seconds_config: SecondsConfig) -> tuple:
     Launches a Chrome browser instance and returns the driver and wait objects.
 
     The function:
-    - Creates a Chrome WebDriver using the configured Chrome path
+    - Automatically resolves the correct ChromeDriver version using webdriver-manager
     - Initializes a WebDriverWait instance with the timeout from config
 
     Args:
@@ -49,7 +50,7 @@ def setup_browser(seconds_config: SecondsConfig) -> tuple:
     Example:
         driver, wait = setup_browser(seconds_config)
     """
-    service = Service(CHROME_PATH)
+    service = Service(ChromeDriverManager().install())
     driver = webdriver.Chrome(service=service)
     wait = WebDriverWait(driver, seconds_config.webdriver_wait_timeout)
 
