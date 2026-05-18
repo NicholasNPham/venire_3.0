@@ -16,13 +16,7 @@ import os
 from datetime import date
 
 # CONSTANT
-EXCEL_FILE: str = "VENIRE.xlsx"
 JSON_FILE: str = "config.json"
-
-# OUTCOME CONSTANTS
-OUTCOME_NO_RESULTS = "No matches found"
-OUTCOME_COMPLETE   = "CH Found"
-OUTCOME_ERROR      = "Error - check manually"
 
 # FUNCTIONS
 def main():
@@ -38,7 +32,7 @@ def main():
     config = load_config(JSON_FILE)
 
     # SETUP - RUN ONCE
-    jurors = load_jurors(EXCEL_FILE, log)
+    jurors = load_jurors(config.app.excel_file, log, config.app.outcome_bad_format)
     log.info("Folders and jurors loaded successfully")
 
     # SETUP - BROWSER -> LOGIN
@@ -47,7 +41,7 @@ def main():
 
     # SET DEFAULT OUTCOME FOR ALL JURORS BEFORE LOOP STARTS
     for juror_id, data in jurors.items():
-        write_outcome(EXCEL_FILE, data["row"], OUTCOME_ERROR)
+        write_outcome(config.app.excel_file, data["row"], config.app.outcome_error)
 
     # RESUME LOGIC - CHECK IF PROGRESS FILE EXIST
     last_completed = read_progress()
@@ -71,7 +65,7 @@ def main():
                 is_no_result_found = check_for_no_results(driver, log, config.browser.search, config.browser.seconds) # CHECK FOR NO RESULTS
                 # IF NO RESULTS — write outcome, reset, next juror
                 if is_no_result_found:
-                    write_outcome(EXCEL_FILE, data['row'],OUTCOME_NO_RESULTS)
+                    write_outcome(config.app.excel_file, data['row'], config.app.outcome_no_results)
                     reset_search(wait, config.browser.navigation, config.browser.seconds)
                     continue
                 # IF RESULTS — select, generate pdf, save pdf, write outcome
@@ -80,14 +74,14 @@ def main():
                     pdf_bytes = generate_pdf_from_page(driver)
                     pdf_path = build_pdf_path(folders["screenshots"], juror_id, data["last_name"], data["first_name"])
                     save_pdf(pdf_bytes, pdf_path)
-                    write_outcome(EXCEL_FILE, data["row"], OUTCOME_COMPLETE)
+                    write_outcome(config.app.excel_file, data["row"], config.app.outcome_complete)
                     return_to_main_page(wait, config.browser.navigation)
                     save_progress(juror_id)
                     reset_search(wait, config.browser.navigation, config.browser.seconds)
 
             except Exception as e:
                 log.error(f"Error on juror {juror_id}: {e}")
-                write_outcome(EXCEL_FILE, data["row"], OUTCOME_ERROR)
+                write_outcome(config.app.excel_file, data["row"], config.app.outcome_error)
                 reset_search(wait, config.browser.navigation, config.browser.seconds)
                 continue
 
@@ -99,7 +93,7 @@ def main():
         teardown_browser(driver, log) # ALWAYS RUN NO MATTER WHAT
 
     if completed:
-        prompt_and_combine(folders["screenshots"], EXCEL_FILE, log)
+        prompt_and_combine(folders["screenshots"], config.app.excel_file, log)
 
 if __name__ == "__main__":
     main()
