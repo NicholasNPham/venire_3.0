@@ -15,7 +15,6 @@ NAME_COLUMN = 3
 DOB_COLUMN = 2
 JUROR_COLUMN = 1
 OUTCOME_COLUMN = 4
-OUTCOME_BAD_FORMAT = "Warning - Could not confirm if there were matches, please manually check"
 
 # PARSE CONSTANTS
 MAX_SPLIT_PARAMETER = 1
@@ -64,7 +63,7 @@ def parse(name: str)-> tuple:
 
     return first_name, last_name
 
-def format_dob(dob) -> str:
+def format_dob(dob) -> str | None:
     """
     Formats a date of birth into mm/dd/yyyy string.
     Handles both datetime objects and plain strings.
@@ -86,7 +85,7 @@ def format_dob(dob) -> str:
 
     return None
 
-def build_juror_from_row(sheet, row: int, file_path: str) -> tuple:
+def build_juror_from_row(sheet, row: int, file_path: str, outcome_bad_format: str) -> None | tuple:
     """
     Reads one row from the sheet and builds a juror dictionary.
     Calls parse() and format_dob() to clean the data.
@@ -95,6 +94,7 @@ def build_juror_from_row(sheet, row: int, file_path: str) -> tuple:
     sheet:     openpyxl worksheet object
     row:       Row number to read from
     file_path: Path to the Excel file ex: 'venire.xlsx'
+    outcome_bad_format: Outcome string to write when a row cannot be parsed
 
     Returns:
         (juror_id, juror_data) as a tuple
@@ -115,8 +115,8 @@ def build_juror_from_row(sheet, row: int, file_path: str) -> tuple:
 
     if not first_name or not last_name or not formatted_dob:
 
-        # DONT FORGET TO UNCOMMENT THIS WHEN RUNNING LIVE, ITS COMMENTED TO KEEP THE TEST EXCEL FILE THE SAME
-        write_outcome(file_path, row, OUTCOME_BAD_FORMAT)
+        # DON'T FORGET TO UNCOMMENT THIS WHEN RUNNING LIVE, ITS COMMENTED TO KEEP THE TEST EXCEL FILE THE SAME
+        write_outcome(file_path, row, outcome_bad_format)
 
         return None
 
@@ -129,7 +129,7 @@ def build_juror_from_row(sheet, row: int, file_path: str) -> tuple:
 
     return str(juror_id), juror_data # Creates the dictionary and uses the juror ID as the key and the juror data as the value of the dictionary
 
-def parse_juror_sheet(sheet, file_path: str) -> dict:
+def parse_juror_sheet(sheet, file_path: str, outcome_bad_format: str) -> dict:
     """
     Loops through every row in the sheet and builds
     a dictionary of all valid jurors.
@@ -140,6 +140,7 @@ def parse_juror_sheet(sheet, file_path: str) -> dict:
     Args:
     sheet:     openpyxl worksheet object
     file_path: Path to the Excel file ex: 'venire.xlsx'
+    outcome_bad_format: Outcome string passed through to build_juror_from_row()
 
     Returns:
         Dictionary of all valid jurors keyed by juror ID
@@ -152,7 +153,7 @@ def parse_juror_sheet(sheet, file_path: str) -> dict:
     jurors = {}
 
     for row in range(1, sheet.max_row + 1):  # start at top of the list, max data knows where the data ends on the list
-        result = build_juror_from_row(sheet, row, file_path)
+        result = build_juror_from_row(sheet, row, file_path, outcome_bad_format)
         if result is None:  # skip empty or bad rows
             continue
         juror_id, juror_data = result # unpack the two things returned
@@ -160,12 +161,14 @@ def parse_juror_sheet(sheet, file_path: str) -> dict:
 
     return jurors
 
-def load_jurors(file_path: str, log: logging.Logger) -> dict:
+def load_jurors(file_path: str, log: logging.Logger, outcome_bad_format: str) -> dict:
     """
-    Opens the excel file and enters into Sheet1 and parses it with the function created to create a dictionary.
+    Opens the Excel file and enters into Sheet1 and parses it with the function created to create a dictionary.
 
     Args:
-        file_path: string path to excel file
+        file_path: string path to Excel file
+        log: logging.Logger object
+        outcome_bad_format: Outcome string written to rows that cannot be parsed
 
     Returns:
         jurors: a dictionary with key: juror_id and value: juror_data
@@ -177,7 +180,7 @@ def load_jurors(file_path: str, log: logging.Logger) -> dict:
 
     workbook = load_workbook_safe(file_path)
     sheet    = workbook['Sheet1']
-    jurors   = parse_juror_sheet(sheet, file_path)
+    jurors   = parse_juror_sheet(sheet, file_path, outcome_bad_format)
 
     workbook.close()
 
