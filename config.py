@@ -54,29 +54,71 @@ class BrowserConfig:
 
 @dataclass
 class AppConfig:
+    """
+    Configuration loaded from the 'App' section of config.json.
+
+    Holds outcome label strings written to Excel and the target workbook filename.
+    These values are set in config.json so they can be changed without touching source code.
+
+    Attributes:
+        outcome_no_results: Written to Excel when the search returns no matches.
+        outcome_complete:   Written to Excel when a CH record is found.
+        outcome_error:      Written to Excel when an unexpected error occurs.
+        outcome_bad_format: Written to Excel when a row could not be parsed correctly.
+        excel_file:         Filename of the Excel workbook to read and update.
+
+    Example:
+        config = load_config("config.json")
+        config.app.outcome_complete  # "CH Found"
+    """
+    outcome_no_results: str
+    outcome_complete: str
+    outcome_error: str
+    outcome_bad_format: str
+    excel_file: str
+
+@dataclass
+class RootConfig:
+    """
+    Top-level configuration object returned by load_config().
+
+    Holds all configuration sections for the application.
+
+    Attributes:
+        browser: All browser/Selenium related configuration.
+        app:     Application-level outcome labels and filenames.
+
+    Example:
+        config = load_config("config.json")
+        config.browser.seconds.webdriver_wait_timeout  # 5
+        config.app.excel_file                          # "VENIRE.xlsx"
+    """
     browser: BrowserConfig
+    app: AppConfig
 
 #FUNCTIONS
-def load_config(json_file: str) -> AppConfig:
+def load_config(json_file: str) -> RootConfig:
     """
-    parse the the json file into a python dictionary, pull each sub-sections
-    as the key and the strings as the values
+    Loads and parses config.json into a fully populated RootConfig object.
 
     Args:
-        json_file: path to json file
+        json_file: Path to the JSON configuration file.
 
     Returns:
-        returns a fully populated AppConfig object
+        A RootConfig instance containing all browser and app configuration.
 
     Example:
         config = load_config("config.json")
         config.browser.login.username_field  # "loginForm:username"
+        config.app.outcome_complete          # "CH Found"
+        config.app.excel_file                # "VENIRE.xlsx"
     """
     try:
         with open(json_file, "r") as json_data:
             data = json.load(json_data)
 
         browser_data = data["Browser"]
+        app_data = data["App"]
 
         login_data = browser_data["Login"]
         search_data = browser_data["Search"]
@@ -124,8 +166,16 @@ def load_config(json_file: str) -> AppConfig:
             seconds=seconds_config
         )
 
-        app_config = AppConfig(browser=browser_config)
-        return app_config
+        app_config = AppConfig(
+            outcome_no_results=app_data["outcome_no_results"],
+            outcome_complete=app_data["outcome_complete"],
+            outcome_error=app_data["outcome_error"],
+            outcome_bad_format=app_data["outcome_bad_format"],
+            excel_file=app_data["excel_file"],
+        )
+
+        root_config = RootConfig(browser=browser_config, app=app_config)
+        return root_config
     except FileNotFoundError:
         raise FileNotFoundError(f"config file not found: {json_file}")
     except KeyError as e:
