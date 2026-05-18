@@ -67,28 +67,28 @@ def main():
 
             try:
                 log.info(f"{i}/{len(jurors)}")
-                input_juror_data(driver, wait, data['first_name'], data['last_name'], data['dob']) # SEARCH
-                is_no_result_found = check_for_no_results(driver, log) # CHECK FOR NO RESULTS
+                input_juror_data(driver, wait, data['first_name'], data['last_name'], data['dob'], config.browser.search) # SEARCH
+                is_no_result_found = check_for_no_results(driver, log, config.browser.search) # CHECK FOR NO RESULTS
                 # IF NO RESULTS — write outcome, reset, next juror
                 if is_no_result_found:
                     write_outcome(EXCEL_FILE, data['row'],OUTCOME_NO_RESULTS)
-                    reset_search(wait)
+                    reset_search(wait, config.browser.navigation)
                     continue
                 # IF RESULTS — select, generate pdf, save pdf, write outcome
                 else:
-                    select_view_selection(wait)
+                    select_view_selection(wait, config.browser.results)
                     pdf_bytes = generate_pdf_from_page(driver)
                     pdf_path = build_pdf_path(folders["screenshots"], juror_id, data["last_name"], data["first_name"])
                     save_pdf(pdf_bytes, pdf_path)
                     write_outcome(EXCEL_FILE, data["row"], OUTCOME_COMPLETE)
-                    return_to_main_page(wait)
+                    return_to_main_page(wait, config.browser.navigation)
                     save_progress(juror_id)
-                    reset_search(wait)
+                    reset_search(wait, config.browser.navigation)
 
             except Exception as e:
                 log.error(f"Error on juror {juror_id}: {e}")
                 write_outcome(EXCEL_FILE, data["row"], OUTCOME_ERROR)
-                reset_search(wait)
+                reset_search(wait, config.browser.navigation)
                 continue
 
         completed = True
