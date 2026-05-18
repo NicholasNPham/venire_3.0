@@ -39,11 +39,18 @@ class NavigationConfig:
     reset_button: str
 
 @dataclass
+class SecondsConfig:
+    pause_between_actions: int
+    webdriver_wait_timeout: int
+    no_results_wait_timeout: int
+
+@dataclass
 class BrowserConfig:
     login: LoginConfig
     search: SearchConfig
     results: ResultsConfig
     navigation: NavigationConfig
+    seconds: SecondsConfig
 
 @dataclass
 class AppConfig:
@@ -75,6 +82,7 @@ def load_config(json_file: str) -> AppConfig:
         search_data = browser_data["Search"]
         results_data = browser_data["Results"]
         navigation_data = browser_data["Navigation"]
+        seconds_data = browser_data["Seconds"]
 
         login_config = LoginConfig(
             username_field=login_data["username_field"],
@@ -102,11 +110,18 @@ def load_config(json_file: str) -> AppConfig:
             reset_button=navigation_data["reset_button"],
         )
 
+        seconds_config = SecondsConfig(
+            pause_between_actions=seconds_data["pause_between_actions"],
+            webdriver_wait_timeout=seconds_data["webdriver_wait_timeout"],
+            no_results_wait_timeout=seconds_data["no_results_wait_timeout"]
+        )
+
         browser_config = BrowserConfig(
             login=login_config,
             search=search_config,
             results=results_config,
-            navigation=navigation_config
+            navigation=navigation_config,
+            seconds=seconds_config
         )
 
         app_config = AppConfig(browser=browser_config)
