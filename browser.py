@@ -9,7 +9,7 @@ of case summary pages.
 # Local Imports
 from key import WEBSITE, CHROME_PATH, USERNAME, PASSWORD
 from logger import setup_logger
-from config import LoginConfig, SearchConfig
+from config import LoginConfig, SearchConfig, ResultsConfig, NavigationConfig
 
 # Standard Library Imports
 import time
@@ -114,7 +114,8 @@ def login(driver: WebDriver, wait: WebDriverWait, log: logging.Logger, login_con
     wait.until(EC.presence_of_element_located((By.ID, post_login_element_id)))
     log.info("Logged in successfully")
 
-def input_juror_data(driver, wait, first_name, last_name, dob) -> None:
+def input_juror_data(driver, wait, first_name, last_name, dob, search_config: SearchConfig) -> None:
+
     """
     Inputs juror search criteria into the form and submits the search.
 
@@ -124,31 +125,44 @@ def input_juror_data(driver, wait, first_name, last_name, dob) -> None:
     - Clicks the search button to execute the query
 
     Args:
+        driver (WebDriver): The active Selenium WebDriver instance
+        wait (WebDriverWait): WebDriverWait instance for handling explicit waits
         first_name (str): Juror's first name
         last_name (str): Juror's last name
-        dob (str): Juror's date of birth (expected format matches site input)
+        dob (str): Juror's date of birth in mm/dd/yyyy format
+        search_config (SearchConfig): Dataclass containing search form element IDs
 
     Returns:
         None
-    """
-    driver.find_element(By.XPATH, EXCLUDE_ATTORNEYS_CHECKBOX_XPATH).click()
-    driver.find_element(By.XPATH, EXCLUDE_JUDGES_CHECKBOX_XPATH).click()
-    wait.until(EC.element_to_be_clickable((By.ID, LAST_NAME_FIELD_ID))).send_keys(last_name)  # finds username field enters username
-    wait.until(EC.element_to_be_clickable((By.ID, FIRST_NAME_FIELD_ID))).send_keys(first_name)
-    wait.until(EC.element_to_be_clickable((By.ID, DOB_FIELD_ID))).send_keys(dob)
-    wait.until(EC.element_to_be_clickable((By.ID, SEARCH_BUTTON_ID))).click()
 
-def select_view_selection(wait) -> None:
+    Example:
+        input_juror_data(driver, wait, "John", "Smith", "04/23/1985", search_config)
+    """
+    driver.find_element(By.XPATH, search_config.exclude_attorneys_checkbox).click()
+    driver.find_element(By.XPATH, search_config.exclude_judges_checkbox).click()
+    wait.until(EC.element_to_be_clickable((By.ID, search_config.last_name_field))).send_keys(last_name)  # finds username field enters username
+    wait.until(EC.element_to_be_clickable((By.ID, search_config.first_name_field))).send_keys(first_name)
+    wait.until(EC.element_to_be_clickable((By.ID, search_config.dob_field))).send_keys(dob)
+    wait.until(EC.element_to_be_clickable((By.ID, search_config.search_button))).click()
+
+def select_view_selection(wait, results_config: ResultsConfig) -> None:
     """
     Clicks the 'View Selected' button on the search results page.
 
     This action navigates to the detailed case summary page
     for the selected record.
 
+    Args:
+        wait (WebDriverWait): WebDriverWait instance for handling explicit waits
+        results_config (ResultsConfig): Dataclass containing results page element IDs
+
     Returns:
         None
+
+    Example:
+        select_view_selection(wait, results_config)
     """
-    wait.until(EC.element_to_be_clickable((By.ID, VIEW_SELECTION_BUTTON_ID))).click()
+    wait.until(EC.element_to_be_clickable((By.ID, results_config.view_selection_button))).click()
 
 def generate_pdf_from_page(driver) -> bytes:
     """
@@ -179,47 +193,75 @@ def save_pdf(file_bytes, file_path):
     with open(file_path, "wb") as pdf_file:
         pdf_file.write(file_bytes)
 
-def return_to_main_page(wait) -> None:
+def return_to_main_page(wait, navigation_config: NavigationConfig) -> None:
     """
     Navigates back to the main search page after viewing a case.
 
     The function:
     - Clicks the back button from the PDF view page
     - Clicks the back button from the selection page
-    - Resets the search form
-    - Waits briefly to ensure the page is fully reloaded
+
+    Args:
+        wait (WebDriverWait): WebDriverWait instance for handling explicit waits
+        navigation_config (NavigationConfig): Dataclass containing navigation element IDs
 
     Returns:
         None
-    """
-    wait.until(EC.element_to_be_clickable((By.ID, BACK_BUTTON_FROM_PDF_PAGE_ID))).click()
-    wait.until(EC.element_to_be_clickable((By.ID, BACK_BUTTON_FROM_SELECTION_PAGE_ID))).click()
 
-def reset_search(wait) -> None:
+    Example:
+        return_to_main_page(wait, navigation_config)
     """
-    presses the reset button on the first page.
+    wait.until(EC.element_to_be_clickable((By.ID, navigation_config.back_button_from_pdf_page))).click()
+    wait.until(EC.element_to_be_clickable((By.ID, navigation_config.back_button_from_selection_page))).click()
 
-    Returns:
-        None
+def reset_search(wait, navigation_config: NavigationConfig) -> None:
     """
-    wait.until(EC.element_to_be_clickable((By.ID, RESET_BUTTON_ID))).click()
+        Clicks the reset button to clear all search fields and return to a clean search state.
+
+        The function:
+        - Clicks the reset button on the search page
+        - Waits briefly to ensure the page is fully reloaded before next action
+
+        Args:
+            wait (WebDriverWait): WebDriverWait instance for handling explicit waits
+            navigation_config (NavigationConfig): Dataclass containing navigation element IDs
+
+        Returns:
+            None
+
+        Example:
+            reset_search(wait, navigation_config)
+        """
+    wait.until(EC.element_to_be_clickable((By.ID, navigation_config.reset_button))).click()
     time.sleep(PAUSE_BETWEEN_ACTIONS_SECONDS)
 
-def check_for_no_results(driver, log: logging.Logger) -> bool:
+def check_for_no_results(driver, log: logging.Logger, search_config: SearchConfig) -> bool:
     """
-    Checks if the 'no matches found' popup appeared after a search.
+    Checks if the 'No matches found' popup appeared after a search.
+
+    The function:
+    - Creates a short-timeout wait to avoid blocking on missing elements
+    - Returns True immediately if the no-results banner is visible
+    - Returns False and logs a debug message if results are present
+
+    Args:
+        driver (WebDriver): The active Selenium WebDriver instance
+        log (logging.Logger): Logger instance for recording search outcomes
+        search_config (SearchConfig): Dataclass containing the no-results popup XPath
 
     Returns:
-        True if no results found
-        False if results are present
+        bool: True if no results found, False if results are present
+
+    Example:
+        is_empty = check_for_no_results(driver, log, search_config)
     """
     short_wait = WebDriverWait(driver, NO_RESULTS_WAIT_TIMEOUT_SECONDS)
 
     try:
-        short_wait.until(EC.visibility_of_element_located((By.XPATH, NO_RESULTS_MESSAGE_XPATH)))
+        short_wait.until(EC.visibility_of_element_located((By.XPATH, search_config.no_results_popup_message)))
         return True
     except Exception:
-        log.debug(f"No 'no results' banner detected — assuming results present")
+        log.debug("No 'No Results Found' Prompt, Navigating to Results Page")
         return False
 
 def teardown_browser(driver, log: logging.Logger) -> None:
@@ -234,28 +276,4 @@ def teardown_browser(driver, log: logging.Logger) -> None:
     """
     log.info("FINISHED VENIRE EXCEL")
     driver.quit()
-
-# TESTING ONLY
-
-# if __name__ == "__main__":
-#     driver, wait = setup_browser()
-
-    # # Test 1 - juror that EXISTS
-    # input_juror_data(driver, wait, TEST_FIRST_NAME, TEST_LAST_NAME, TEST_DATE_OF_BIRTH)
-    # print(check_for_no_results(driver))  # should print False
-    # select_view_selection(wait)
-    # pdf_bytes = generate_pdf_from_page(driver)
-    # save_pdf(pdf_bytes, r"C:\Users\npham\PycharmProjects\venire_3.0\screenshots\ccis_output.pdf")
-    # return_to_main_page(wait)
-    # teardown_browser(driver)
-
-    # # Test 2 - juror that DOES NOT EXIST
-    # input_juror_data(driver, wait, "ZZZZZ", "ZZZZZ", "01/01/1900")
-    # print(check_for_no_results(driver))  # should print True
-    # reset_search(wait)
-    # select_view_selection(wait)
-    # pdf_bytes = generate_pdf_from_page(driver)
-    # save_pdf(pdf_bytes, r"C:\Users\npham\PycharmProjects\venire_3.0\screenshots\ccis_output.pdf")
-    # return_to_main_page(wait)
-    # teardown_browser(driver)
 
