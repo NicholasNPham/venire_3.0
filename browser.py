@@ -8,8 +8,7 @@ of case summary pages.
 
 # Local Imports
 from key import WEBSITE, CHROME_PATH, USERNAME, PASSWORD
-from logger import setup_logger
-from config import LoginConfig, SearchConfig, ResultsConfig, NavigationConfig
+from config import LoginConfig, SearchConfig, ResultsConfig, NavigationConfig, SecondsConfig
 
 # Standard Library Imports
 import time
@@ -25,24 +24,21 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.remote.webdriver import WebDriver
 
 # CONSTANTS
-PAUSE_BETWEEN_ACTIONS_SECONDS = 1
-WEBDRIVER_WAIT_TIMEOUT_SECONDS = 5
-NO_RESULTS_WAIT_TIMEOUT_SECONDS = 1
 PRINT_TO_PDF_WEBTOOL_COMMAND = "Page.printToPDF"
 PDF_DATA_STRING = 'data'
 PRINT_BACKGROUND_KEY = "printBackground"
 
 # FUNCTIONS
-def setup_browser(log: logging.Logger) -> tuple:
+def setup_browser(seconds_config: SecondsConfig) -> tuple:
     """
     Launches a Chrome browser instance and returns the driver and wait objects.
 
     The function:
     - Creates a Chrome WebDriver using the configured Chrome path
-    - Initializes a WebDriverWait instance with the default timeout
+    - Initializes a WebDriverWait instance with the timeout from config
 
     Args:
-        log (logging.Logger): Logger instance for recording browser startup
+        seconds_config (SecondsConfig): Dataclass containing timeout values
 
     Returns:
         tuple[WebDriver, WebDriverWait]:
@@ -51,13 +47,13 @@ def setup_browser(log: logging.Logger) -> tuple:
             - wait: WebDriverWait instance for handling explicit waits
 
     Example:
-        driver, wait = setup_browser(log)
+        driver, wait = setup_browser(seconds_config)
     """
     service = Service(CHROME_PATH)
     driver = webdriver.Chrome(service=service)
-    wait = WebDriverWait(driver, WEBDRIVER_WAIT_TIMEOUT_SECONDS)
+    wait = WebDriverWait(driver, seconds_config.webdriver_wait_timeout)
 
-    return (driver, wait)
+    return driver, wait
 
 def login(driver: WebDriver, wait: WebDriverWait, log: logging.Logger, login_config: LoginConfig, post_login_element_id: str ) -> None:
     """
@@ -194,28 +190,29 @@ def return_to_main_page(wait, navigation_config: NavigationConfig) -> None:
     wait.until(EC.element_to_be_clickable((By.ID, navigation_config.back_button_from_pdf_page))).click()
     wait.until(EC.element_to_be_clickable((By.ID, navigation_config.back_button_from_selection_page))).click()
 
-def reset_search(wait, navigation_config: NavigationConfig) -> None:
+def reset_search(wait, navigation_config: NavigationConfig, seconds_config: SecondsConfig) -> None:
     """
-        Clicks the reset button to clear all search fields and return to a clean search state.
+    Clicks the reset button to clear all search fields and return to a clean search state.
 
-        The function:
-        - Clicks the reset button on the search page
-        - Waits briefly to ensure the page is fully reloaded before next action
+    The function:
+    - Clicks the reset button on the search page
+    - Waits briefly to ensure the page is fully reloaded before next action
 
-        Args:
-            wait (WebDriverWait): WebDriverWait instance for handling explicit waits
-            navigation_config (NavigationConfig): Dataclass containing navigation element IDs
+    Args:
+        wait (WebDriverWait): WebDriverWait instance for handling explicit waits
+        navigation_config (NavigationConfig): Dataclass containing navigation element IDs
+        seconds_config (SecondsConfig): Dataclass containing timeout values
 
-        Returns:
-            None
+    Returns:
+        None
 
-        Example:
-            reset_search(wait, navigation_config)
-        """
+    Example:
+        reset_search(wait, navigation_config, seconds_config)
+    """
     wait.until(EC.element_to_be_clickable((By.ID, navigation_config.reset_button))).click()
-    time.sleep(PAUSE_BETWEEN_ACTIONS_SECONDS)
+    time.sleep(seconds_config.pause_between_actions)
 
-def check_for_no_results(driver, log: logging.Logger, search_config: SearchConfig) -> bool:
+def check_for_no_results(driver, log: logging.Logger, search_config: SearchConfig, seconds_config: SecondsConfig) -> bool:
     """
     Checks if the 'No matches found' popup appeared after a search.
 
@@ -228,14 +225,15 @@ def check_for_no_results(driver, log: logging.Logger, search_config: SearchConfi
         driver (WebDriver): The active Selenium WebDriver instance
         log (logging.Logger): Logger instance for recording search outcomes
         search_config (SearchConfig): Dataclass containing the no-results popup XPath
+        seconds_config (SecondsConfig): Dataclass containing timeout values
 
     Returns:
         bool: True if no results found, False if results are present
 
     Example:
-        is_empty = check_for_no_results(driver, log, search_config)
+        is_empty = check_for_no_results(driver, log, search_config, seconds_config)
     """
-    short_wait = WebDriverWait(driver, NO_RESULTS_WAIT_TIMEOUT_SECONDS)
+    short_wait = WebDriverWait(driver, seconds_config.no_results_wait_timeout)
 
     try:
         short_wait.until(EC.visibility_of_element_located((By.XPATH, search_config.no_results_popup_message)))
@@ -250,6 +248,7 @@ def teardown_browser(driver, log: logging.Logger) -> None:
 
     Args:
         driver: The active Selenium WebDriver instance
+        log (logging.Logger): Logger instance for recording search outcomes
 
     Returns:
         None
