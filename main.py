@@ -41,10 +41,6 @@ def main():
     driver, wait = setup_browser(config.browser.seconds, args.headless)
     login(driver, wait, log, config.browser.login, config.browser.search.last_name_field)
 
-    # SET DEFAULT OUTCOME FOR ALL JURORS BEFORE LOOP STARTS
-    for juror_id, data in jurors.items():
-        write_outcome(config.app.excel_file, data["row"], config.app.outcome_error)
-
     # RESUME LOGIC - CHECK IF PROGRESS FILE EXIST
     last_completed = None # Always initialize last_completed as None
     skip = False
@@ -52,6 +48,11 @@ def main():
     if not args.fresh:
         last_completed = read_progress()
         skip = last_completed is not None
+
+    # SET DEFAULT OUTCOME FOR ALL JURORS BEFORE LOOP STARTS
+    if not skip:
+        for juror_id, data in jurors.items():
+            write_outcome(config.app.excel_file, data["row"], config.app.outcome_error)
 
     # MAIN LOOP
     completed = False
