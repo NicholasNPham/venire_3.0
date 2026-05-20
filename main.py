@@ -93,7 +93,11 @@ def main():
             except Exception as e:
                 log.error(f"Error on juror {juror_id}: {e}")
                 write_outcome(config.app.excel_file, data["row"], config.app.outcome_error)
-                reset_search(wait, config.browser.navigation, config.browser.seconds)
+                try:
+                    reset_search(wait, config.browser.navigation, config.browser.seconds)
+                except Exception as error:
+                    log.error(f"Reset failed after error — breaking out of loop. - {error}")
+                    break
                 continue
 
         completed = True
