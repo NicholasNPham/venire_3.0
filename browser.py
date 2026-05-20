@@ -30,16 +30,18 @@ PDF_DATA_STRING = 'data'
 PRINT_BACKGROUND_KEY = "printBackground"
 
 # FUNCTIONS
-def setup_browser(seconds_config: SecondsConfig) -> tuple:
+def setup_browser(seconds_config: SecondsConfig, headless: bool = False) -> tuple:
     """
     Launches a Chrome browser instance and returns the driver and wait objects.
 
     The function:
     - Automatically resolves the correct ChromeDriver version using webdriver-manager
     - Initializes a WebDriverWait instance with the timeout from config
+    - Optionally runs Chrome in headless mode with no visible browser window
 
     Args:
         seconds_config (SecondsConfig): Dataclass containing timeout values
+        headless (bool, optional): If True, runs Chrome without a visible window. Defaults to False.
 
     Returns:
         tuple[WebDriver, WebDriverWait]:
@@ -49,9 +51,14 @@ def setup_browser(seconds_config: SecondsConfig) -> tuple:
 
     Example:
         driver, wait = setup_browser(seconds_config)
+        driver, wait = setup_browser(seconds_config, headless=True)
     """
+    options = webdriver.ChromeOptions()
+    if headless:
+        options.add_argument("--headless")
+
     service = Service(ChromeDriverManager().install())
-    driver = webdriver.Chrome(service=service)
+    driver = webdriver.Chrome(service=service, options=options)
     wait = WebDriverWait(driver, seconds_config.webdriver_wait_timeout)
 
     return driver, wait
