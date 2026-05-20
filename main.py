@@ -7,9 +7,10 @@ Purpose: Main loop for Venire Automation
 from browser import setup_browser, login, input_juror_data, check_for_no_results, select_view_selection, generate_pdf_from_page, save_pdf, return_to_main_page, reset_search, teardown_browser
 from excel_handler import load_jurors, write_outcome
 from file_handler import setup_folders, build_pdf_path, save_progress, read_progress, delete_progress
-from report_builder import prompt_and_combine
+from report_builder import prompt_and_combine, combine
 from logger import setup_logger
 from config import load_config
+from cli import parse_args
 
 # STANDARD LIBRARY IMPORTS
 import os
@@ -20,6 +21,7 @@ JSON_FILE: str = "config.json"
 
 # FUNCTIONS
 def main():
+    args = parse_args()
 
     # SETUP - RUN ONCE
     folders = setup_folders()
@@ -36,7 +38,7 @@ def main():
     log.info("Folders and jurors loaded successfully")
 
     # SETUP - BROWSER -> LOGIN
-    driver, wait = setup_browser(config.browser.seconds)
+    driver, wait = setup_browser(config.browser.seconds, args.headless)
     login(driver, wait, log, config.browser.login, config.browser.search.last_name_field)
 
     # SET DEFAULT OUTCOME FOR ALL JURORS BEFORE LOOP STARTS
@@ -44,14 +46,21 @@ def main():
         write_outcome(config.app.excel_file, data["row"], config.app.outcome_error)
 
     # RESUME LOGIC - CHECK IF PROGRESS FILE EXIST
-    last_completed = read_progress()
-    skip = last_completed is not None
+    last_completed = None # Always initialize last_completed as None
+    skip = False
 
+    if not args.fresh:
+        last_completed = read_progress()
+        skip = last_completed is not None
 
     # MAIN LOOP
     completed = False
     try:
         for i, (juror_id, data) in enumerate(jurors.items(), start=1):
+
+            # This arg will check if --limit is not none and checks to see if 'i' is greater than args.limit
+            if args.limit is not None and i >= args.limit:
+                break
 
             # SKIP UNTIL WE PASS LAST COMPLETED
             if skip:
@@ -93,8 +102,12 @@ def main():
             delete_progress()
         teardown_browser(driver, log) # ALWAYS RUN NO MATTER WHAT
 
-    if completed:
+    if args.combine is None and completed:
         prompt_and_combine(folders["screenshots"], config.app.excel_file, log)
+    elif args.combine is True and completed:
+        combine(folders["screenshots"], config.app.excel_file, log)
+    elif args.combine is False and completed:
+        log.info("Skipping PDF combine — --no-combine passed.")
 
 if __name__ == "__main__":
     main()
