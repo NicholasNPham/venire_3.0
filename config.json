@@ -1,0 +1,40 @@
+{
+    "Browser": {
+        "Login": {
+            "username_field": "loginForm:username",
+            "password_field": "loginForm:password",
+            "submit_login_button": "loginForm:login"
+        },
+        "Search": {
+            "exclude_attorneys_checkbox": "//label[@for='search_tab:personForm:nameTypes:0']",
+            "exclude_judges_checkbox": "//label[@for='search_tab:personForm:nameTypes:1']",
+            "last_name_field": "search_tab:personForm:lastname",
+            "first_name_field": "search_tab:personForm:fname",
+            "dob_field": "search_tab:personForm:dob_input",
+            "search_button": "//button[.//span[text()='Search']]",
+            "no_results_popup_message": "//span[@class='ui-messages-info-detail' and text()='No matches found.']"
+        },
+        "Results": {
+            "view_selection_button": "//button[.//span[text()='view selection']]"
+        },
+        "Navigation": {
+            "back_button_from_pdf_page": "//button[contains(@id, 'caseSummary')]",
+            "back_button_from_selection_page": "//button[contains(@onclick, 'PrimeFaces.ab') and not(contains(@onclick, 'caseSummary'))]",
+            "reset_button": "//button[.//span[text()='Reset']]"
+        },
+        "Seconds": {
+          "pause_between_actions": 1,
+          "webdriver_wait_timeout": 5,
+          "no_results_wait_timeout": 1
+        }
+    },
+    "App": {
+      "outcome_no_results": "No matches found",
+      "outcome_complete": "CH Found",
+      "outcome_error": "Error - check manually",
+      "outcome_bad_format": "Warning - Could not confirm if there were matches, please manually check",
+      "excel_file": "VENIRE.xlsx"
+
+    }
+
+}
