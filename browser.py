@@ -127,7 +127,7 @@ def input_juror_data(driver, wait, first_name, last_name, dob, search_config: Se
     wait.until(EC.element_to_be_clickable((By.ID, search_config.last_name_field))).send_keys(last_name)  # finds username field enters username
     wait.until(EC.element_to_be_clickable((By.ID, search_config.first_name_field))).send_keys(first_name)
     wait.until(EC.element_to_be_clickable((By.ID, search_config.dob_field))).send_keys(dob)
-    wait.until(EC.element_to_be_clickable((By.ID, search_config.search_button))).click()
+    wait.until(EC.element_to_be_clickable((By.XPATH, search_config.search_button))).click()
 
 def select_view_selection(wait, results_config: ResultsConfig) -> None:
     """
@@ -146,7 +146,7 @@ def select_view_selection(wait, results_config: ResultsConfig) -> None:
     Example:
         select_view_selection(wait, results_config)
     """
-    wait.until(EC.element_to_be_clickable((By.ID, results_config.view_selection_button))).click()
+    wait.until(EC.element_to_be_clickable((By.XPATH, results_config.view_selection_button))).click()
 
 def generate_pdf_from_page(driver) -> bytes:
     """
@@ -195,8 +195,8 @@ def return_to_main_page(wait, navigation_config: NavigationConfig) -> None:
     Example:
         return_to_main_page(wait, navigation_config)
     """
-    wait.until(EC.element_to_be_clickable((By.ID, navigation_config.back_button_from_pdf_page))).click()
-    wait.until(EC.element_to_be_clickable((By.ID, navigation_config.back_button_from_selection_page))).click()
+    wait.until(EC.element_to_be_clickable((By.XPATH, navigation_config.back_button_from_pdf_page))).click()
+    wait.until(EC.element_to_be_clickable((By.XPATH, navigation_config.back_button_from_selection_page))).click()
 
 def reset_search(wait, navigation_config: NavigationConfig, seconds_config: SecondsConfig) -> None:
     """
@@ -217,7 +217,7 @@ def reset_search(wait, navigation_config: NavigationConfig, seconds_config: Seco
     Example:
         reset_search(wait, navigation_config, seconds_config)
     """
-    wait.until(EC.element_to_be_clickable((By.ID, navigation_config.reset_button))).click()
+    wait.until(EC.element_to_be_clickable((By.XPATH, navigation_config.reset_button))).click()
     time.sleep(seconds_config.pause_between_actions)
 
 def check_for_no_results(driver, log: logging.Logger, search_config: SearchConfig, seconds_config: SecondsConfig) -> bool:
