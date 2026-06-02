@@ -209,3 +209,39 @@ def write_outcome(file_path: str, row: int, outcome: str) -> None:
     workbook.save(file_path)
     workbook.close()
 
+def bulk_write_error_outcome(file_path: str, jurors: dict, outcome: str, log: logging.Logger) -> None:
+    """
+    Writes a default outcome string to every juror row in a single workbook session.
+
+    Opens the workbook once, iterates over all jurors writing the outcome to column D,
+    then saves and closes once. Replaces per-row open/save/close calls that caused
+    severe performance degradation on large venire sheets.
+
+    Logs progress every 100 rows.
+
+    Args:
+        file_path: Path to the Excel file ex: 'venire.xlsx'
+        jurors:    Dictionary of valid jurors keyed by juror ID, each containing a 'row' key
+                   ex: {"1042": {"row": 2, "dob": "04/23/1985", ...}, ...}
+        outcome:   Outcome string to write to every juror row ex: 'Error: Processing'
+        log:       logging.Logger object for progress reporting
+
+    Returns:
+        None
+
+    Examples:
+        bulk_write_error_outcome("venire.xlsx", jurors, config.app.outcome_error, log)
+    """
+    workbook = load_workbook_safe(file_path)
+    sheet    = workbook['Sheet1']
+
+    for row_number, (juror_id, juror_data) in enumerate(jurors.items(), start=1):
+        if row_number % 100 == 0:
+            log.info(f"Outcome Pre-Change Count: {row_number} / {len(jurors)}")
+
+        sheet.cell(row=juror_data['row'], column=OUTCOME_COLUMN).value = outcome
+
+    workbook.save(file_path)
+    workbook.close()
+
+
