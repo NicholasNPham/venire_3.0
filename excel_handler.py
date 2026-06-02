@@ -129,7 +129,7 @@ def build_juror_from_row(sheet, row: int, file_path: str, outcome_bad_format: st
 
     return str(juror_id), juror_data # Creates the dictionary and uses the juror ID as the key and the juror data as the value of the dictionary
 
-def parse_juror_sheet(sheet, file_path: str, outcome_bad_format: str, log: logging.Logger) -> dict:
+def parse_juror_sheet(sheet, file_path: str, outcome_bad_format: str) -> dict:
     """
     Loops through every row in the sheet and builds
     a dictionary of all valid jurors.
@@ -141,7 +141,6 @@ def parse_juror_sheet(sheet, file_path: str, outcome_bad_format: str, log: loggi
     sheet:     openpyxl worksheet object
     file_path: Path to the Excel file ex: 'venire.xlsx'
     outcome_bad_format: Outcome string passed through to build_juror_from_row()
-    log: logging.Logger object
 
     Returns:
         Dictionary of all valid jurors keyed by juror ID
@@ -155,8 +154,6 @@ def parse_juror_sheet(sheet, file_path: str, outcome_bad_format: str, log: loggi
 
     for row in range(1, sheet.max_row + 1):  # start at top of the list, max data knows where the data ends on the list
         result = build_juror_from_row(sheet, row, file_path, outcome_bad_format)
-        if row % 100 == 0:
-            log.info(f"Parsed {row}/{sheet.max_row} rows")
         if result is None:  # skip empty or bad rows
             continue
         juror_id, juror_data = result # unpack the two things returned
@@ -183,7 +180,7 @@ def load_jurors(file_path: str, log: logging.Logger, outcome_bad_format: str) ->
 
     workbook = load_workbook_safe(file_path)
     sheet    = workbook['Sheet1']
-    jurors   = parse_juror_sheet(sheet, file_path, outcome_bad_format, log)
+    jurors   = parse_juror_sheet(sheet, file_path, outcome_bad_format)
 
     workbook.close()
 
