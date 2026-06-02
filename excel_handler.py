@@ -235,11 +235,9 @@ def bulk_write_error_outcome(file_path: str, jurors: dict, outcome: str, log: lo
     workbook = load_workbook_safe(file_path)
     sheet    = workbook['Sheet1']
 
-    for row_number, (juror_id, juror_data) in enumerate(jurors.items(), start=1):
-        if row_number % 100 == 0:
-            log.info(f"Outcome Pre-Change Count: {row_number} / {len(jurors)}")
-
+    for juror_id, juror_data in jurors.items():
         sheet.cell(row=juror_data['row'], column=OUTCOME_COLUMN).value = outcome
+    log.info(f"SUCCESS: Written Pre-Checked {len(jurors)} jurors")
 
     workbook.save(file_path)
     workbook.close()
