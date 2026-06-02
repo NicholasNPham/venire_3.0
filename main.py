@@ -5,7 +5,7 @@ Purpose: Main loop for Venire Automation
 
 # LOCAL IMPORTS
 from browser import setup_browser, login, input_juror_data, check_for_no_results, select_view_selection, generate_pdf_from_page, save_pdf, return_to_main_page, reset_search, teardown_browser
-from excel_handler import load_jurors, write_outcome
+from excel_handler import load_jurors, write_outcome, bulk_write_error_outcome
 from file_handler import setup_folders, build_pdf_path, save_progress, read_progress, delete_progress
 from report_builder import prompt_and_combine, combine
 from logger import setup_logger
@@ -51,8 +51,7 @@ def main():
 
     # SET DEFAULT OUTCOME FOR ALL JURORS BEFORE LOOP STARTS
     if not skip:
-        for juror_id, data in jurors.items():
-            write_outcome(config.app.excel_file, data["row"], config.app.outcome_error)
+      bulk_write_error_outcome(config.app.excel_file, jurors, config.app.outcome_error, log)
 
     # MAIN LOOP
     completed = False
