@@ -74,7 +74,12 @@ def main():
                 is_no_result_found = check_for_no_results(driver, log, config.browser.search, config.browser.seconds) # CHECK FOR NO RESULTS
                 # IF NO RESULTS — write outcome, reset, next juror
                 if is_no_result_found:
-                    write_outcome(config.app.excel_file, data['row'], config.app.outcome_no_results)
+                    if len(data["last_name"].split()) >= 2:
+                        outcome = config.app.outcome_bad_format
+                        log.warning(f"Juror ID: {juror_id} - found compound last name - flagged for manual review")
+                    else:
+                        outcome = config.app.outcome_no_results
+                    write_outcome(config.app.excel_file, data['row'], outcome)
                     save_progress(juror_id)
                     reset_search(wait, config.browser.navigation, config.browser.seconds)
                     continue
