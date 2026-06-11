@@ -99,7 +99,8 @@ def main():
                     break
                 continue
 
-        completed = True
+        else:
+            completed = True
 
     finally:
         if completed:
