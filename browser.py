@@ -23,6 +23,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.remote.webdriver import WebDriver
 from webdriver_manager.chrome import ChromeDriverManager
+from selenium.common.exceptions import TimeoutException
 
 # CONSTANTS
 PRINT_TO_PDF_WEBTOOL_COMMAND = "Page.printToPDF"
@@ -37,11 +38,13 @@ def setup_browser(seconds_config: SecondsConfig, headless: bool = False) -> tupl
     The function:
     - Automatically resolves the correct ChromeDriver version using webdriver-manager
     - Initializes a WebDriverWait instance with the timeout from config
-    - Optionally runs Chrome in headless mode with no visible browser window
+    - Optionally runs Chrome in headless mode with stability arguments applied
 
     Args:
         seconds_config (SecondsConfig): Dataclass containing timeout values
-        headless (bool, optional): If True, runs Chrome without a visible window. Defaults to False.
+        headless (bool, optional): If True, runs Chrome without a visible window using
+            headless=new mode with no-sandbox, disable-dev-shm-usage, disable-gpu,
+            and a fixed window size for rendering stability. Defaults to False.
 
     Returns:
         tuple[WebDriver, WebDriverWait]:
@@ -55,7 +58,11 @@ def setup_browser(seconds_config: SecondsConfig, headless: bool = False) -> tupl
     """
     options = webdriver.ChromeOptions()
     if headless:
-        options.add_argument("--headless")
+        options.add_argument("--headless=new")
+        options.add_argument("--no-sandbox")
+        options.add_argument("--disable-dev-shm-usage")
+        options.add_argument("--disable-gpu")
+        options.add_argument("--window-size=1920,1080")
 
     service = Service(ChromeDriverManager().install())
     driver = webdriver.Chrome(service=service, options=options)
@@ -227,7 +234,8 @@ def check_for_no_results(driver, log: logging.Logger, search_config: SearchConfi
     The function:
     - Creates a short-timeout wait to avoid blocking on missing elements
     - Returns True immediately if the no-results banner is visible
-    - Returns False and logs a debug message if results are present
+    - Returns False and logs an info message if results are present
+    - Only catches TimeoutException — dead WebDriver errors propagate up
 
     Args:
         driver (WebDriver): The active Selenium WebDriver instance
@@ -246,8 +254,8 @@ def check_for_no_results(driver, log: logging.Logger, search_config: SearchConfi
     try:
         short_wait.until(EC.visibility_of_element_located((By.XPATH, search_config.no_results_popup_message)))
         return True
-    except Exception:
-        log.debug("No 'No Results Found' Prompt, Navigating to Results Page")
+    except TimeoutException:
+        log.info("No 'No Results Found' Prompt, Navigating to Results Page")
         return False
 
 def teardown_browser(driver, log: logging.Logger) -> None:
