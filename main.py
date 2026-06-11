@@ -21,6 +21,31 @@ JSON_FILE: str = "config.json"
 
 # FUNCTIONS
 def main():
+    """
+    Entry point for Venire Automation 3.0.
+
+    Orchestrates the full juror processing pipeline from setup to teardown.
+
+    The function:
+    - Parses CLI arguments for headless mode, row limits, and combine behavior
+    - Sets up output folders, structured logging, and config from config.json
+    - Loads jurors from Excel and launches a Chrome browser session
+    - Resumes from last completed juror if a progress file exists
+    - For each juror: searches, checks for results, generates a PDF if found,
+      and writes the outcome back to Excel
+    - Flags compound last names with no results for manual review
+    - On completion, optionally merges all PDFs and the Excel report into one file
+
+    Args:
+        None
+
+    Returns:
+        None
+
+    Example:
+        python main.py
+        python main.py --headless --limit 10 --no-combine
+    """
     args = parse_args()
 
     # SETUP - RUN ONCE
