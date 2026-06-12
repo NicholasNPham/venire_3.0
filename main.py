@@ -110,7 +110,7 @@ def main():
                     continue
                 # IF RESULTS — select, generate pdf, save pdf, write outcome
                 else:
-                    select_view_selection(wait, config.browser.results)
+                    select_view_selection(wait, config.browser.results, config.browser.navigation)
                     pdf_bytes = generate_pdf_from_page(driver)
                     pdf_path = build_pdf_path(folders["screenshots"], juror_id, data["last_name"], data["first_name"])
                     save_pdf(pdf_bytes, pdf_path)
