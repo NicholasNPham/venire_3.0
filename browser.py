@@ -136,7 +136,7 @@ def input_juror_data(driver, wait, first_name, last_name, dob, search_config: Se
     wait.until(EC.element_to_be_clickable((By.ID, search_config.dob_field))).send_keys(dob)
     wait.until(EC.element_to_be_clickable((By.XPATH, search_config.search_button))).click()
 
-def select_view_selection(wait, results_config: ResultsConfig) -> None:
+def select_view_selection(wait, results_config: ResultsConfig, navigation_config: NavigationConfig) -> None:
     """
     Clicks the 'View Selected' button on the search results page.
 
@@ -146,14 +146,16 @@ def select_view_selection(wait, results_config: ResultsConfig) -> None:
     Args:
         wait (WebDriverWait): WebDriverWait instance for handling explicit waits
         results_config (ResultsConfig): Dataclass containing results page element IDs
+        navigation_config (NavigationConfig): Dataclass containing navigation page element IDs
 
     Returns:
         None
 
     Example:
-        select_view_selection(wait, results_config)
+        select_view_selection(wait, results_config, navigation_config)
     """
     wait.until(EC.element_to_be_clickable((By.XPATH, results_config.view_selection_button))).click()
+    wait.until(EC.element_to_be_clickable((By.XPATH, navigation_config.back_button_from_pdf_page)))
 
 def generate_pdf_from_page(driver) -> bytes:
     """
